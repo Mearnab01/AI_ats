@@ -67,3 +67,5 @@ ml_model/*.h5
 
 # Ignore generated PDF reports
 backend/exports/*.pdf
+logs
+inter

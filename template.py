@@ -11,7 +11,7 @@ STRUCTURE = [
     (".gitignore", ""),
     ("README.md", "# ATS Resume Scorer\n"),
     ("requirements.txt", "fastapi\nstreamlit\nspacy\nsentence-transformers\ngroq\nsupabase\npython-dotenv\n"),
-    (".env.example", "GROQ_API_KEY=\nSUPABASE_URL=\nSUPABASE_KEY=\n"),
+    (".env.example", "GROQ_API_KEY=\nSUPABASE_URL=\nSUPABASE_SERVICE_ROLE_KEY=\n"),
 
     # Backend
     ("backend/__init__.py", ""),
