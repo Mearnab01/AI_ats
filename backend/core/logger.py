@@ -1,18 +1,19 @@
-import logging
 import sys
-from pathlib import Path
+import logging
+from logging.handlers import RotatingFileHandler
+from pathlib import Path 
 
 # Create a logs directory if it doesn't exist
-LOG_DIR = Path(__file__).parent.parent / "logs"
+LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
 
 LOG_FILE = LOG_DIR / "app.log"
 
 # Define the format: Time - File/Module Name - Level - Message
-LOG_FORMAT = "%(asctime)s - [%(name)s] - %(levelname)s - %(message)s"
+LOG_FORMAT = "%(asctime)s | [%(name)s] | %(filename)s:%(lineno)d | %(levelname)s | %(message)s"
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
-def setup_logger(module_name: str):
+def setup_logger(module_name: str)-> logging.Logger:
     """
     Configures a logger that outputs to both a file (app.log) and the console.
     """
@@ -22,7 +23,7 @@ def setup_logger(module_name: str):
     # Prevent duplicate logs if the logger is already configured
     if not logger.handlers:
         # 1. File Handler (saves to backend/logs/app.log)
-        file_handler = logging.FileHandler(LOG_FILE)
+        file_handler = RotatingFileHandler(LOG_FILE, maxBytes=5 * 1024 * 1024, backupCount=5, encoding="utf-8")
         file_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=DATE_FORMAT))
         logger.addHandler(file_handler)
 
