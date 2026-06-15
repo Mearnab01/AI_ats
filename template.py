@@ -1,12 +1,13 @@
 """
 template.py
-Run this script to scaffold the entire project structure for the ATS Scorer.
+Run this script to scaffold the ATS Resume Scorer project.
+Creates missing files/folders only.
 """
 
 import os
 
-# Define the structure: (filepath, content)
 STRUCTURE = [
+
     # Root Files
     (".gitignore", ""),
     ("README.md", "# ATS Resume Scorer\n"),
@@ -35,46 +36,84 @@ STRUCTURE = [
     ("backend/services/report_generator.py", ""),
     ("backend/services/resume_analyzer.py", ""),
     ("backend/services/resume_parser.py", ""),
-    ("backend/services/job_fetcher.py", ""), # New Apify service
+    ("backend/services/job_fetcher.py", ""),
     ("backend/templates/summary.html", ""),
     ("backend/utils/__init__.py", ""),
 
-    # Frontend (Streamlit)
+    # Frontend Core
     ("frontend/__init__.py", ""),
     ("frontend/streamlit_app.py", ""),
     ("frontend/.streamlit/config.toml", ""),
-    ("frontend/assets/styles.css", ""),
-    ("frontend/components/__init__.py", ""),
+
+    # Existing Frontend
     ("frontend/services/__init__.py", ""),
     ("frontend/services/api_client.py", ""),
     ("frontend/views/__init__.py", ""),
     ("frontend/views/landing.py", ""),
     ("frontend/views/scorer.py", ""),
     ("frontend/views/history.py", ""),
+    ("frontend/components/__init__.py", ""),
+
+    # New Static CSS
+    ("frontend/static/css/variables.css", ""),
+    ("frontend/static/css/base.css", ""),
+    ("frontend/static/css/components.css", ""),
+    ("frontend/static/css/animations.css", ""),
+    ("frontend/static/css/streamlit_overrides.css", ""),
+    ("frontend/static/css/style.css", ""),
+
+    # New Static JS
+    ("frontend/static/js/ui.js", ""),
+
+    # Components
+    ("frontend/components/_helpers.py", ""),
+    ("frontend/components/score_display.py", ""),
+    ("frontend/components/skill_validation.py", ""),
+    ("frontend/components/jd_comparison.py", ""),
+    ("frontend/components/strengths_issues.py", ""),
+    ("frontend/components/detailed_feedback.py", ""),
+    ("frontend/components/action_items.py", ""),
+    ("frontend/components/recommendations.py", ""),
+    ("frontend/components/dashboard.py", ""),
 
     # Jupyter Notebooks
     ("jupyter notebooks/01_EDA_and_DATA_prep.ipynb", ""),
     ("jupyter notebooks/02_BERT_EMBEDDINGS.ipynb", ""),
     ("jupyter notebooks/03_BERT_FINETUNE.ipynb", ""),
-    
+
     # ML Artifacts
-    ("ml model/.gitkeep", "")
+    ("ml model/.gitkeep", ""),
 ]
 
-def main():
-    for path, content in STRUCTURE:
-        # Create directory if it doesn't exist
-        directory = os.path.dirname(path)
-        if directory and not os.path.exists(directory):
-            os.makedirs(directory)
-            print(f"Created directory: {directory}")
 
-        # Create file with content
+def main():
+
+    created = 0
+    skipped = 0
+
+    for path, content in STRUCTURE:
+
+        directory = os.path.dirname(path)
+
+        if directory:
+            os.makedirs(directory, exist_ok=True)
+
+        if os.path.exists(path):
+            print(f"⏭ Skipped existing: {path}")
+            skipped += 1
+            continue
+
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)
-            print(f"Created file: {path}")
 
-    print("\n✅ Project structure scaffolded successfully!")
+        print(f"✅ Created: {path}")
+        created += 1
+
+    print("\n" + "=" * 50)
+    print(f"Created: {created}")
+    print(f"Skipped: {skipped}")
+    print("ATS Resume Scorer structure ready!")
+
 
 if __name__ == "__main__":
     main()

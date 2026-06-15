@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Calibr — JD Match Analysis</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0c0e12;
+        --surface: #111318;
+        --elevated: #181b22;
+        --border: rgba(255, 255, 255, 0.08);
+        --border-str: rgba(255, 255, 255, 0.14);
+        --brand: #e8a44a;
+        --brand-dim: #c4852e;
+        --brand-glow: rgba(232, 164, 74, 0.12);
+        --success: #2ecc8a;
+        --success-bg: rgba(46, 204, 138, 0.1);
+        --success-bd: rgba(46, 204, 138, 0.22);
+        --warning: #f5a623;
+        --warning-bg: rgba(245, 166, 35, 0.1);
+        --warning-bd: rgba(245, 166, 35, 0.22);
+        --danger: #f0503a;
+        --danger-bg: rgba(240, 80, 58, 0.1);
+        --danger-bd: rgba(240, 80, 58, 0.22);
+        --info: #4a9ef5;
+        --info-bg: rgba(74, 158, 245, 0.1);
+        --info-bd: rgba(74, 158, 245, 0.22);
+        --text: #f0f2f5;
+        --text-sec: #8c92a0;
+        --text-muted: #555c6b;
+        --font-d: "Fraunces", Georgia, serif;
+        --font-b: "DM Sans", Helvetica, sans-serif;
+        --font-m: "DM Mono", monospace;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-b);
+        line-height: 1.6;
+        padding: 44px 52px;
+        font-size: 13px;
+      }
+
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 16px;
+        margin-bottom: 36px;
+        border-bottom: 1px solid var(--border-str);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+
+      .brand-mark {
+        width: 26px;
+        height: 26px;
+        background: linear-gradient(135deg, var(--brand), var(--brand-dim));
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .brand-mark svg {
+        width: 13px;
+        height: 13px;
+      }
+
+      .brand-name {
+        font-family: var(--font-d);
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--text);
+        letter-spacing: -0.02em;
+      }
+
+      .brand-name span {
+        color: var(--brand);
+      }
+      .header-right {
+        text-align: right;
+      }
+
+      .report-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.8px;
+        color: var(--text-muted);
+      }
+
+      .report-date {
+        font-size: 12px;
+        color: var(--text-sec);
+        margin-top: 3px;
+      }
+
+      .page-title {
+        font-family: var(--font-d);
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.025em;
+        margin-bottom: 32px;
+      }
+
+      .section-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 28px 0 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .section-icon {
+        width: 26px;
+        height: 26px;
+        background: var(--brand-glow);
+        border: 1px solid rgba(232, 164, 74, 0.25);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .section-icon svg {
+        width: 12px;
+        height: 12px;
+        stroke: var(--brand);
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .section-title {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-muted);
+      }
+
+      /* Match score cards */
+      .match-cards {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .match-card {
+        flex: 1;
+        background: var(--elevated);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 16px;
+        text-align: center;
+      }
+
+      .match-pct {
+        font-family: var(--font-d);
+        font-size: 48px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.04em;
+      }
+
+      .match-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: var(--text-muted);
+        margin-top: 8px;
+      }
+
+      .bert-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 8px;
+        padding: 2px 8px;
+        background: var(--info-bg);
+        color: var(--info);
+        border: 1px solid var(--info-bd);
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+      }
+
+      .bert-badge svg {
+        width: 10px;
+        height: 10px;
+        stroke: var(--info);
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      /* Match band */
+      .match-band {
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .band-label {
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 11px;
+      }
+
+      /* Keyword sections */
+      .kw-group-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+      }
+
+      .pill-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 16px;
+      }
+
+      .pill {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .pill-matched {
+        background: var(--success-bg);
+        color: var(--success);
+        border: 1px solid var(--success-bd);
+      }
+      .pill-missing {
+        background: var(--danger-bg);
+        color: var(--danger);
+        border: 1px solid var(--danger-bd);
+      }
+
+      /* Skills gap */
+      .gap-item {
+        padding: 8px 12px;
+        border-left: 3px solid var(--warning);
+        background: var(--warning-bg);
+        border-radius: 0 6px 6px 0;
+        margin-bottom: 6px;
+        font-size: 12px;
+        color: var(--warning);
+        line-height: 1.5;
+      }
+
+      /* Suggestions */
+      .suggestion {
+        background: var(--elevated);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--brand);
+        border-radius: 0 8px 8px 0;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        font-size: 13px;
+        color: var(--text-sec);
+        line-height: 1.6;
+      }
+
+      .suggestion strong {
+        color: var(--text);
+      }
+
+      /* No JD */
+      .no-jd {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: var(--elevated);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        color: var(--text-muted);
+      }
+
+      .no-jd-title {
+        font-family: var(--font-d);
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-sec);
+        margin-bottom: 8px;
+        margin-top: 14px;
+      }
+      .no-jd-body {
+        font-size: 13px;
+        max-width: 380px;
+        margin: 0 auto;
+        line-height: 1.7;
+      }
+
+      .page-footer {
+        margin-top: 52px;
+        padding-top: 14px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: var(--text-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-header">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#0C0E12"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="12 2 2 7 12 12 22 7 12 2" />
+            <polyline points="2 17 12 22 22 17" />
+            <polyline points="2 12 12 17 22 12" />
+          </svg>
+        </div>
+        <span class="brand-name">Calibr<span>.</span></span>
+      </div>
+      <div class="header-right">
+        <div class="report-label">JD Match Analysis — Report 3 of 4</div>
+        <div class="report-date">{{ timestamp | format_date }}</div>
+      </div>
+    </div>
+
+    <h1 class="page-title">Job Description Match Analysis</h1>
+
+    {% if jd_analysis %}
+
+    <!-- Match score cards -->
+    <div class="section-heading">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" />
+          <circle cx="12" cy="12" r="6" />
+          <circle cx="12" cy="12" r="2" />
+        </svg>
+      </div>
+      <span class="section-title">Match Scores</span>
+    </div>
+
+    {% set kw_pct = jd_analysis.match_percentage | float %} {% set sem_pct =
+    (jd_analysis.semantic_similarity | float) * 100 %}
+
+    <div class="match-cards">
+      <div class="match-card">
+        <div
+          class="match-pct"
+          style="color: {% if kw_pct >= 70 %}#2ECC8A{% elif kw_pct >= 45 %}#F5A623{% else %}#F0503A{% endif %};"
+        >
+          {{ "%.0f" | format(kw_pct) }}%
+        </div>
+        <div class="match-label">Keyword Match</div>
+      </div>
+      <div class="match-card">
+        <div
+          class="match-pct"
+          style="color: {% if sem_pct >= 70 %}#A78BFA{% elif sem_pct >= 45 %}#F5A623{% else %}#F0503A{% endif %};"
+        >
+          {{ "%.0f" | format(sem_pct) }}%
+        </div>
+        <div class="match-label">Semantic Similarity</div>
+        {% if bert_model_info and bert_model_info.using_finetuned %}
+        <div class="bert-badge">
+          <svg viewBox="0 0 24 24">
+            <rect x="4" y="4" width="16" height="16" rx="2" />
+            <rect x="9" y="9" width="6" height="6" />
+            <line x1="9" y1="1" x2="9" y2="4" />
+            <line x1="15" y1="1" x2="15" y2="4" />
+          </svg>
+          Fine-tuned BERT &middot; MAE {{ bert_model_info.finetuned_mae }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Match band -->
+    {% if jd_analysis.match_band %} {% set band = jd_analysis.match_band %}
+    <div
+      class="match-band"
+      style="
+            background: {% if band == 'high' %}rgba(46,204,138,.08){% elif band == 'medium' %}rgba(245,166,35,.08){% else %}rgba(240,80,58,.08){% endif %};
+            border: 1px solid {% if band == 'high' %}rgba(46,204,138,.22){% elif band == 'medium' %}rgba(245,166,35,.22){% else %}rgba(240,80,58,.22){% endif %};"
+    >
+      <span
+        class="band-label"
+        style="color: {% if band == 'high' %}#2ECC8A{% elif band == 'medium' %}#F5A623{% else %}#F0503A{% endif %};"
+      >
+        {{ band | upper }}
+      </span>
+      <span style="color: var(--text-sec); font-size: 13px">
+        {% if band == 'high' %}— Strong overall fit with the job description. {%
+        elif band == 'medium' %}— Partial fit. Address the missing keywords
+        below. {% else %}— Resume needs significant tailoring for this role.{%
+        endif %}
+      </span>
+    </div>
+    {% endif %}
+
+    <!-- Matched keywords -->
+    {% if jd_analysis.matched_keywords %}
+    <div class="section-heading">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+      </div>
+      <span class="section-title"
+        >Matched Keywords ({{ jd_analysis.matched_keywords | length }})</span
+      >
+    </div>
+    <div class="kw-group-label">
+      These keywords from the JD appear in your resume:
+    </div>
+    <div class="pill-wrap">
+      {% for kw in jd_analysis.matched_keywords %}
+      <span class="pill pill-matched">{{ kw }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Missing keywords -->
+    {% if jd_analysis.missing_keywords %}
+    <div class="section-heading">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </div>
+      <span class="section-title"
+        >Missing Keywords ({{ jd_analysis.missing_keywords | length }})</span
+      >
+    </div>
+    <div class="kw-group-label">
+      Important JD keywords not found in your resume:
+    </div>
+    <div class="pill-wrap">
+      {% for kw in jd_analysis.missing_keywords %}
+      <span class="pill pill-missing">{{ kw }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Skills gap -->
+    {% if jd_analysis.skills_gap %}
+    <div class="section-heading">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+          />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      </div>
+      <span class="section-title"
+        >Skills Gap ({{ jd_analysis.skills_gap | length }})</span
+      >
+    </div>
+    {% for skill in jd_analysis.skills_gap %} {% if skill and skill | length > 1
+    %}
+    <div class="gap-item">Consider adding: <strong>{{ skill }}</strong></div>
+    {% endif %} {% endfor %} {% endif %}
+
+    <!-- Suggestions -->
+    <div class="section-heading">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24">
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
+      </div>
+      <span class="section-title">Improvement Suggestions</span>
+    </div>
+
+    {% if jd_analysis.match_percentage | float < 40 %}
+    <div class="suggestion">
+      <strong>Tailor your Professional Summary:</strong>
+      Keyword match is critically low ({{ "%.0f" |
+      format(jd_analysis.match_percentage | float) }}%). Rewrite your summary to
+      explicitly reference the role title and 2–3 core requirements.
+    </div>
+    {% endif %} {% if jd_analysis.missing_keywords %}
+    <div class="suggestion">
+      <strong>Incorporate missing keywords naturally:</strong>
+      Weave the missing keywords into your experience bullets or Skills section
+      where you genuinely have the experience. Do not keyword-stuff.
+    </div>
+    {% endif %} {% if jd_analysis.skills_gap %}
+    <div class="suggestion">
+      <strong>Address the skills gap:</strong>
+      The JD mentions {{ jd_analysis.skills_gap | length }} skill(s) not in your
+      resume. If you have these skills, add them to your Skills section and
+      demonstrate them in a project bullet.
+    </div>
+    {% endif %} {% if jd_analysis.match_percentage | float >= 60 %}
+    <div class="suggestion">
+      <strong>Quantify matched keywords:</strong>
+      Your keyword match is solid. Make sure the bullets containing matched
+      keywords also include hard numbers (e.g., "500+ users", "40% faster") to
+      reinforce credibility.
+    </div>
+    {% endif %} {% else %}
+
+    <div class="no-jd">
+      <svg
+        viewBox="0 0 24 24"
+        width="40"
+        height="40"
+        fill="none"
+        stroke="var(--text-muted)"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+      </svg>
+      <div class="no-jd-title">No Job Description Provided</div>
+      <p class="no-jd-body">
+        To get a personalised keyword match score, paste the job description in
+        the Analyser before running your scan.
+      </p>
+    </div>
+
+    {% endif %}
+
+    <div class="page-footer">
+      <span>Calibr — Resume Intelligence</span>
+      <span>Report 3 of 4 — JD Match Analysis</span>
+    </div>
+  </body>
+</html>

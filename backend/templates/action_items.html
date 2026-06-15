@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Calibr — Skill Validation</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0c0e12;
+        --surface: #111318;
+        --elevated: #181b22;
+        --border: rgba(255, 255, 255, 0.08);
+        --border-str: rgba(255, 255, 255, 0.14);
+        --brand: #e8a44a;
+        --brand-dim: #c4852e;
+        --brand-glow: rgba(232, 164, 74, 0.12);
+        --success: #2ecc8a;
+        --success-bg: rgba(46, 204, 138, 0.1);
+        --success-bd: rgba(46, 204, 138, 0.22);
+        --warning: #f5a623;
+        --warning-bg: rgba(245, 166, 35, 0.1);
+        --warning-bd: rgba(245, 166, 35, 0.22);
+        --danger: #f0503a;
+        --danger-bg: rgba(240, 80, 58, 0.1);
+        --danger-bd: rgba(240, 80, 58, 0.22);
+        --text: #f0f2f5;
+        --text-sec: #8c92a0;
+        --text-muted: #555c6b;
+        --font-d: "Fraunces", Georgia, serif;
+        --font-b: "DM Sans", Helvetica, sans-serif;
+        --font-m: "DM Mono", monospace;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-b);
+        line-height: 1.6;
+        padding: 44px 52px;
+        font-size: 13px;
+      }
+
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 16px;
+        margin-bottom: 36px;
+        border-bottom: 1px solid var(--border-str);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+
+      .brand-mark {
+        width: 26px;
+        height: 26px;
+        background: linear-gradient(135deg, var(--brand), var(--brand-dim));
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .brand-mark svg {
+        width: 13px;
+        height: 13px;
+      }
+
+      .brand-name {
+        font-family: var(--font-d);
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--text);
+        letter-spacing: -0.02em;
+      }
+
+      .brand-name span {
+        color: var(--brand);
+      }
+
+      .header-right {
+        text-align: right;
+      }
+
+      .report-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.8px;
+        color: var(--text-muted);
+      }
+
+      .report-date {
+        font-size: 12px;
+        color: var(--text-sec);
+        margin-top: 3px;
+      }
+
+      .page-title {
+        font-family: var(--font-d);
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.025em;
+        margin-bottom: 32px;
+      }
+
+      /* Section heading */
+      .section-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 28px 0 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .section-icon {
+        width: 26px;
+        height: 26px;
+        background: var(--brand-glow);
+        border: 1px solid rgba(232, 164, 74, 0.25);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .section-icon svg {
+        width: 12px;
+        height: 12px;
+        stroke: var(--brand);
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .section-title {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-muted);
+      }
+
+      /* Stat boxes */
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .stat-box {
+        background: var(--elevated);
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        padding: 14px 12px;
+        text-align: center;
+      }
+
+      .stat-value {
+        font-family: var(--font-d);
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.03em;
+      }
+
+      .stat-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+        margin-top: 5px;
+      }
+
+      /* Progress bar */
+      .progress-wrap {
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 9999px;
+        height: 6px;
+        overflow: hidden;
+        margin-bottom: 16px;
+      }
+
+      .progress-bar {
+        height: 100%;
+        border-radius: 9999px;
+      }
+
+      .progress-success {
+        background: linear-gradient(90deg, #1a9e63, var(--success));
+      }
+      .progress-warning {
+        background: linear-gradient(90deg, #c47a0a, var(--warning));
+      }
+      .progress-danger {
+        background: linear-gradient(90deg, #c03020, var(--danger));
+      }
+
+      /* Validated items */
+      .validated-item {
+        padding: 9px 12px;
+        background: var(--success-bg);
+        border-left: 3px solid var(--success);
+        border-radius: 0 7px 7px 0;
+        margin-bottom: 7px;
+      }
+
+      .validated-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--success);
+      }
+
+      .validated-evidence {
+        font-size: 11px;
+        color: var(--text-sec);
+        margin-top: 4px;
+      }
+
+      .project-chip {
+        display: inline-block;
+        background: var(--success-bg);
+        color: var(--success);
+        border: 1px solid var(--success-bd);
+        border-radius: 9999px;
+        padding: 1px 8px;
+        font-size: 11px;
+        font-weight: 600;
+        margin: 2px 3px 0 0;
+      }
+
+      /* Unvalidated */
+      .unvalidated-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+
+      .unvalidated-pill {
+        background: var(--danger-bg);
+        color: var(--danger);
+        border: 1px solid var(--danger-bd);
+        border-radius: 9999px;
+        padding: 3px 10px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .unvalidated-tip {
+        background: var(--warning-bg);
+        border: 1px solid var(--warning-bd);
+        border-radius: 7px;
+        padding: 10px 14px;
+        font-size: 12px;
+        color: var(--warning);
+        line-height: 1.6;
+        margin-top: 10px;
+      }
+
+      /* Info block */
+      .info-block {
+        background: var(--elevated);
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        overflow: hidden;
+        margin-bottom: 16px;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        font-size: 13px;
+      }
+
+      .info-row:last-child {
+        border-bottom: none;
+      }
+      .info-key {
+        font-weight: 600;
+        color: var(--text);
+      }
+      .info-value {
+        color: var(--text-sec);
+        font-family: var(--font-m);
+        font-size: 12px;
+      }
+
+      .tag {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .tag-ok {
+        background: var(--success-bg);
+        color: var(--success);
+        border: 1px solid var(--success-bd);
+      }
+      .tag-warn {
+        background: var(--warning-bg);
+        color: var(--warning);
+        border: 1px solid var(--warning-bd);
+      }
+      .tag-bad {
+        background: var(--danger-bg);
+        color: var(--danger);
+        border: 1px solid var(--danger-bd);
+      }
+
+      .page-footer {
+        margin-top: 52px;
+        padding-top: 14px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: var(--text-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-header">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#0C0E12"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="12 2 2 7 12 12 22 7 12 2" />
+            <polyline points="2 17 12 22 22 17" />
+            <polyline points="2 12 12 17 22 12" />
+          </svg>
+        </div>
+        <span class="brand-name">Calibr<span>.</span></span>
+      </div>
+      <div class="header-right">
+        <div class="report-label">Skill Validation — Report 2 of 4</div>
+        <div class="report-date">{{ timestamp | format_date }}</div>
+      </div>
+    </div>
+
+    <h1 class="page-title">Skill Validation &amp; Content Analysis</h1>
+
+    <!-- Stats -->
+    <div class="section-heading">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+      </div>
+      <span class="section-title">Skill Validation Analysis</span>
+    </div>
+
+    {% set bar_pct = validation_pct %} {% set bar_cls = 'progress-success' if
+    bar_pct >= 80 else ('progress-warning' if bar_pct >= 50 else
+    'progress-danger') %}
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-value" style="color: var(--text)">
+          {{ total_skills }}
+        </div>
+        <div class="stat-label">Total Skills</div>
+      </div>
+      <div class="stat-box" style="border-color: var(--success-bd)">
+        <div class="stat-value" style="color: var(--success)">
+          {{ validated_count }}
+        </div>
+        <div class="stat-label">
+          Validated ({{ "%.0f" | format(validation_pct) }}%)
+        </div>
+      </div>
+      <div class="stat-box" style="border-color: var(--danger-bd)">
+        <div class="stat-value" style="color: var(--danger)">
+          {{ unvalidated_skills | length }}
+        </div>
+        <div class="stat-label">Need Evidence</div>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div
+        class="progress-bar {{ bar_cls }}"
+        style="width: {{ bar_pct }}%;"
+      ></div>
+    </div>
+
+    <!-- Validated -->
+    {% if validated_skills %}
+    <div class="section-heading">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+      </div>
+      <span class="section-title">Validated Skills</span>
+    </div>
+
+    {% for item in validated_skills %}
+    <div class="validated-item">
+      <div class="validated-name">{{ item.skill }}</div>
+      {% if item.projects %}
+      <div class="validated-evidence">
+        Demonstrated in: {% for proj in item.projects %}
+        <span class="project-chip"
+          >{{ proj[:55] }}{% if proj | length > 55 %}…{% endif %}</span
+        >
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %} {% endif %}
+
+    <!-- Unvalidated -->
+    {% if unvalidated_skills %}
+    <div class="section-heading">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </div>
+      <span class="section-title">Unvalidated Skills — Need Evidence</span>
+    </div>
+
+    <p
+      style="
+        font-size: 12px;
+        color: var(--text-sec);
+        margin-bottom: 10px;
+        line-height: 1.6;
+      "
+    >
+      These skills appear in your Skills section but have no supporting context
+      in your projects or experience. Recruiters and ATS systems cross-reference
+      claimed skills against actual work.
+    </p>
+
+    <div class="unvalidated-grid">
+      {% for skill in unvalidated_skills %}
+      <span class="unvalidated-pill">{{ skill }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="unvalidated-tip">
+      <strong>How to fix:</strong> For each skill above, add at least one bullet
+      point in your Projects or Experience section that mentions the technology
+      by name. Example:
+      <em>"Built a REST API using Flask handling 2 000 daily requests."</em>
+    </div>
+    {% endif %}
+
+    <!-- Grammar -->
+    <div class="section-heading">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+          <polyline points="10 9 9 9 8 9" />
+        </svg>
+      </div>
+      <span class="section-title">Grammar &amp; Spelling</span>
+    </div>
+
+    {% set total_err = grammar_summary.total_errors | default(0) %} {% set
+    penalty = grammar_summary.penalty | default(0) %}
+    <div class="info-block">
+      <div class="info-row">
+        <span class="info-key">Total Errors</span>
+        <span class="info-value">
+          {{ total_err }}&nbsp; {% if total_err == 0 %}<span class="tag tag-ok"
+            >Clean</span
+          >
+          {% elif total_err <= 3 %}<span class="tag tag-warn">Minor</span> {%
+          else %}<span class="tag tag-bad">Review</span>{% endif %}
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Penalty Applied</span>
+        <span class="info-value">{{ "%.1f" | format(penalty) }} pts</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Status</span>
+        <span class="info-value">
+          {% if total_err == 0 %}No grammar or spelling errors detected. {% else
+          %}{{ total_err }} potential issue(s) — review flagged terms before
+          submitting. {% endif %}
+        </span>
+      </div>
+    </div>
+
+    <!-- ATS Compatibility -->
+    <div class="section-heading">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24">
+          <rect x="4" y="4" width="16" height="16" rx="2" />
+          <rect x="9" y="9" width="6" height="6" />
+          <line x1="9" y1="1" x2="9" y2="4" />
+          <line x1="15" y1="1" x2="15" y2="4" />
+        </svg>
+      </div>
+      <span class="section-title">ATS Compatibility</span>
+    </div>
+
+    {% set ats_score = component_scores.ats_compatibility %} {% set ats_pct =
+    component_pct.ats_compatibility %}
+    <div class="info-block">
+      <div class="info-row">
+        <span class="info-key">ATS Score</span>
+        <span class="info-value">
+          {{ "%.0f" | format(ats_score) }}/15&nbsp; {% if ats_pct >= 80 %}<span
+            class="tag tag-ok"
+            >Excellent</span
+          >
+          {% elif ats_pct >= 55 %}<span class="tag tag-warn">Moderate</span> {%
+          else %}<span class="tag tag-bad">Needs Work</span>{% endif %}
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Formatting Score</span>
+        <span class="info-value"
+          >{{ "%.0f" | format(component_scores.formatting) }}/20</span
+        >
+      </div>
+      <div class="info-row">
+        <span class="info-key">Content Score</span>
+        <span class="info-value"
+          >{{ "%.0f" | format(component_scores.content) }}/25</span
+        >
+      </div>
+      {% if location_privacy %}
+      <div class="info-row">
+        <span class="info-key">Privacy Risk</span>
+        <span class="info-value">
+          {% set risk = location_privacy.risk | default('none') %} {% if risk ==
+          'none' %}<span class="tag tag-ok">None</span> {% elif risk == 'low'
+          %}<span class="tag tag-warn">Low</span> {% else %}<span
+            class="tag tag-bad"
+            >{{ risk | upper }}</span
+          >{% endif %}
+        </span>
+      </div>
+      {% endif %}
+      <div class="info-row">
+        <span class="info-key">Parsing Friendliness</span>
+        <span class="info-value">
+          {% if ats_pct >= 80 %}Uses clean, standard formatting readable by
+          automated parsers. {% elif ats_pct >= 55 %}Some areas may cause
+          parsing issues — review recommendations. {% else %}Multiple parsing
+          blockers detected — review recommendations urgently.{% endif %}
+        </span>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>Calibr — Resume Intelligence</span>
+      <span>Report 2 of 4 — Skill Validation &amp; Content</span>
+    </div>
+  </body>
+</html>

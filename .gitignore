@@ -69,3 +69,7 @@ ml_model/*.h5
 backend/exports/*.pdf
 logs
 inter
+*.zip
+*.safetensors
+*.bin
+checkpoints/

@@ -1,0 +1,111 @@
+/* ================================================================
+   CALIBR — Animations
+================================================================ */
+
+/* ── Keyframes ── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .55; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes dot-pulse {
+  0%, 80%, 100% { transform: scale(0); opacity: .4; }
+  40%            { transform: scale(1); opacity: 1; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 12px var(--brand-glow); }
+  50%       { box-shadow: var(--shadow-brand); }
+}
+
+/* ── Utility classes ── */
+.animate-fade-up     { animation: fade-up    var(--dur-slow) var(--ease-out) both; }
+.animate-fade-in     { animation: fade-in    var(--dur-slow) var(--ease-out) both; }
+.animate-slide-right { animation: slide-in-right var(--dur-slow) var(--ease-out) both; }
+.animate-scale-in    { animation: scale-in   var(--dur-slow) var(--ease-out) both; }
+.animate-count-up    { animation: count-up   var(--dur-slow) var(--ease-out) both; }
+
+/* Stagger delays */
+.delay-50  { animation-delay:  50ms; }
+.delay-100 { animation-delay: 100ms; }
+.delay-150 { animation-delay: 150ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* ── Spinner ── */
+.spinner {
+  display: inline-block;
+  border: 2px solid var(--border);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin .65s linear infinite;
+}
+.spinner-sm { width: 16px; height: 16px; }
+.spinner-md { width: 24px; height: 24px; }
+.spinner-lg { width: 40px; height: 40px; border-width: 3px; }
+
+/* ── Dot loader ── */
+.dot-loader { display: inline-flex; gap: 5px; align-items: center; }
+.dot-loader span {
+  width: 7px; height: 7px;
+  background: var(--brand);
+  border-radius: 50%;
+  animation: dot-pulse 1.3s infinite ease-in-out both;
+}
+.dot-loader span:nth-child(1) { animation-delay: -.32s; }
+.dot-loader span:nth-child(2) { animation-delay: -.16s; }
+.dot-loader span:nth-child(3) { animation-delay: 0s; }
+
+/* ── Skeleton ── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-elevated) 25%,
+    var(--bg-overlay)  50%,
+    var(--bg-elevated) 75%
+  );
+  background-size: 200% 100%;
+  animation: bar-shimmer 1.7s infinite;
+  border-radius: var(--r-md);
+}
+.skeleton-text  { height: 1em; margin-bottom: var(--sp-2); }
+.skeleton-title { height: 1.5em; width: 55%; margin-bottom: var(--sp-4); }
+.skeleton-card  { height: 100px; margin-bottom: var(--sp-4); }
+
+/* ── Hover lift ── */
+.hover-lift { transition: transform var(--dur-base), box-shadow var(--dur-base); }
+.hover-lift:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+/* ── Brand glow ── */
+.glow-brand { animation: glow-pulse 2.5s infinite; }

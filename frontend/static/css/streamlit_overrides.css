@@ -1,0 +1,56 @@
+/* ================================================================
+   CALIBR — Streamlit-Specific Overrides
+   Flat selectors only. No deep nesting.
+   Injected via st.markdown(<style>...</style>, unsafe_allow_html=True)
+================================================================ */
+
+/* Font import — call this from Python too for reliability */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+/* ── Root overrides ── */
+html, body { background: #0C0E12 !important; }
+
+/* ── Main app background ── */
+.stApp                          { background: #0C0E12 !important; }
+[data-testid="stAppViewContainer"]{ background: #0C0E12 !important; }
+[data-testid="stHeader"]         { background: #111318 !important; border-bottom: 1px solid rgba(255,255,255,.08) !important; }
+[data-testid="stMain"]           { background: transparent !important; }
+[data-testid="block-container"]  { padding-top: 2rem !important; padding-bottom: 2rem !important; max-width: 1040px !important; }
+[data-testid="stBottom"]         { background: #0C0E12 !important; border-top: 1px solid rgba(255,255,255,.08) !important; }
+
+/* ── Sidebar ── */
+section[data-testid="stSidebar"]            { background: #111318 !important; border-right: 1px solid rgba(255,255,255,.08) !important; }
+section[data-testid="stSidebar"] p          { color: rgba(255,255,255,.6) !important; font-family: 'DM Sans', sans-serif !important; }
+section[data-testid="stSidebar"] label      { color: rgba(255,255,255,.6) !important; font-family: 'DM Sans', sans-serif !important; }
+section[data-testid="stSidebar"] h1         { color: #F0F2F5 !important; font-family: 'Fraunces', serif !important; }
+section[data-testid="stSidebar"] h2         { color: #F0F2F5 !important; font-family: 'Fraunces', serif !important; }
+section[data-testid="stSidebar"] h3         { color: #F0F2F5 !important; font-family: 'Fraunces', serif !important; }
+section[data-testid="stSidebar"] .stButton button { width: 100%; justify-content: flex-start; }
+
+/* ── Typography ── */
+[data-testid="stMarkdownContainer"] h1 { font-family: 'Fraunces', serif !important; color: #F0F2F5 !important; }
+[data-testid="stMarkdownContainer"] h2 { font-family: 'Fraunces', serif !important; color: #F0F2F5 !important; }
+[data-testid="stMarkdownContainer"] h3 { font-family: 'Fraunces', serif !important; color: #F0F2F5 !important; }
+[data-testid="stMarkdownContainer"] p  { color: #8C92A0 !important; font-family: 'DM Sans', sans-serif !important; }
+
+/* ── Divider ── */
+hr { border-color: rgba(255,255,255,.08) !important; }
+
+/* ── Spinner ── */
+[data-testid="stSpinner"] { color: #E8A44A !important; }
+
+/* ── Success / Error / Warning / Info toasts ── */
+div[data-testid="stNotificationContentSuccess"] > div { background: rgba(46,204,138,.1) !important; border: 1px solid rgba(46,204,138,.25) !important; color: #2ECC8A !important; }
+div[data-testid="stNotificationContentError"]   > div { background: rgba(240,80,58,.1) !important;  border: 1px solid rgba(240,80,58,.25) !important;  color: #F0503A !important; }
+div[data-testid="stNotificationContentWarning"] > div { background: rgba(245,166,35,.1) !important; border: 1px solid rgba(245,166,35,.25) !important; color: #F5A623 !important; }
+div[data-testid="stNotificationContentInfo"]    > div { background: rgba(74,158,245,.1) !important; border: 1px solid rgba(74,158,245,.25) !important; color: #4A9EF5 !important; }
+
+/* ── Code blocks ── */
+code  { background: #181B22 !important; color: #E8A44A !important; border: 1px solid rgba(255,255,255,.08) !important; }
+pre   { background: #0C0E12 !important; border: 1px solid rgba(255,255,255,.08) !important; color: #8C92A0 !important; }
+
+/* ── Hide default Streamlit chrome ── */
+#MainMenu          { display: none !important; }
+footer             { display: none !important; }
+.stDeployButton    { display: none !important; }
+[data-testid="stToolbar"] { display: none !important; }

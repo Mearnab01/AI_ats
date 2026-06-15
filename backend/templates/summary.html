@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Calibr — Score Summary</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ── Reset ── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* ── Tokens ── */
+      :root {
+        --bg: #0c0e12;
+        --surface: #111318;
+        --elevated: #181b22;
+        --overlay: #1e2129;
+        --border: rgba(255, 255, 255, 0.08);
+        --border-str: rgba(255, 255, 255, 0.14);
+        --brand: #e8a44a;
+        --brand-dim: #c4852e;
+        --brand-glow: rgba(232, 164, 74, 0.12);
+        --success: #2ecc8a;
+        --success-bg: rgba(46, 204, 138, 0.1);
+        --success-bd: rgba(46, 204, 138, 0.22);
+        --warning: #f5a623;
+        --warning-bg: rgba(245, 166, 35, 0.1);
+        --warning-bd: rgba(245, 166, 35, 0.22);
+        --danger: #f0503a;
+        --danger-bg: rgba(240, 80, 58, 0.1);
+        --danger-bd: rgba(240, 80, 58, 0.22);
+        --info: #4a9ef5;
+        --text: #f0f2f5;
+        --text-sec: #8c92a0;
+        --text-muted: #555c6b;
+        --font-d: "Fraunces", Georgia, serif;
+        --font-b: "DM Sans", Helvetica, sans-serif;
+        --font-m: "DM Mono", monospace;
+      }
+
+      /* ── Page ── */
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-b);
+        line-height: 1.6;
+        padding: 44px 52px;
+        font-size: 13px;
+      }
+
+      /* ── Page header ── */
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 16px;
+        margin-bottom: 36px;
+        border-bottom: 1px solid var(--border-str);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+
+      .brand-mark {
+        width: 26px;
+        height: 26px;
+        background: linear-gradient(135deg, var(--brand), var(--brand-dim));
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .brand-mark svg {
+        width: 13px;
+        height: 13px;
+      }
+
+      .brand-name {
+        font-family: var(--font-d);
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--text);
+        letter-spacing: -0.02em;
+      }
+
+      .brand-name span {
+        color: var(--brand);
+      }
+
+      .header-right {
+        text-align: right;
+      }
+
+      .report-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.8px;
+        color: var(--text-muted);
+      }
+
+      .report-date {
+        font-size: 12px;
+        color: var(--text-sec);
+        margin-top: 3px;
+      }
+
+      /* ── Page title ── */
+      .page-title {
+        font-family: var(--font-d);
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.025em;
+        margin-bottom: 32px;
+      }
+
+      /* ── Score hero ── */
+      .score-hero {
+        text-align: center;
+        padding: 36px 40px;
+        background: var(--elevated);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        margin-bottom: 36px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .score-hero::before {
+        content: "";
+        position: absolute;
+        top: -60px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background: var(--brand-glow);
+        pointer-events: none;
+      }
+
+      .score-hero-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--text-muted);
+        margin-bottom: 12px;
+      }
+
+      .score-number {
+        font-family: var(--font-d);
+        font-size: 80px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -4px;
+      }
+
+      .score-denom {
+        font-size: 32px;
+        font-weight: 400;
+        color: var(--text-muted);
+        letter-spacing: -1px;
+      }
+
+      .score-interp {
+        font-size: 14px;
+        color: var(--text-sec);
+        margin-top: 12px;
+        font-style: italic;
+      }
+
+      /* ── Section heading ── */
+      .section-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 32px 0 16px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .section-icon {
+        width: 26px;
+        height: 26px;
+        background: var(--brand-glow);
+        border: 1px solid rgba(232, 164, 74, 0.25);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .section-icon svg {
+        width: 12px;
+        height: 12px;
+        stroke: var(--brand);
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .section-title {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-muted);
+      }
+
+      /* ── Breakdown rows ── */
+      .breakdown-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      }
+
+      .breakdown-row:last-child {
+        border-bottom: none;
+      }
+
+      .breakdown-label {
+        width: 158px;
+        flex-shrink: 0;
+      }
+
+      .breakdown-label-main {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .breakdown-label-sub {
+        font-size: 10px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+
+      .breakdown-bar-wrap {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 9999px;
+        height: 6px;
+        overflow: hidden;
+      }
+
+      .breakdown-bar-fill {
+        height: 100%;
+        border-radius: 9999px;
+      }
+
+      .bar-success {
+        background: linear-gradient(90deg, #1a9e63, var(--success));
+      }
+      .bar-warning {
+        background: linear-gradient(90deg, #c47a0a, var(--warning));
+      }
+      .bar-danger {
+        background: linear-gradient(90deg, #c03020, var(--danger));
+      }
+
+      .breakdown-score {
+        width: 52px;
+        text-align: right;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+        flex-shrink: 0;
+        font-family: var(--font-m);
+      }
+
+      /* ── Strength items ── */
+      .strength-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 9px 12px;
+        background: var(--success-bg);
+        border-left: 3px solid var(--success);
+        border-radius: 0 7px 7px 0;
+        margin-bottom: 7px;
+        font-size: 13px;
+        color: var(--success);
+        line-height: 1.5;
+      }
+
+      .strength-check {
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+
+      .strength-check svg {
+        width: 13px;
+        height: 13px;
+        stroke: var(--success);
+        fill: none;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      /* ── Issue cards ── */
+      .issue-card {
+        background: var(--danger-bg);
+        border: 1px solid var(--danger-bd);
+        border-radius: 9px;
+        overflow: hidden;
+        margin-bottom: 12px;
+      }
+
+      .issue-card-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        background: rgba(240, 80, 58, 0.06);
+        border-bottom: 1px solid var(--danger-bd);
+      }
+
+      .issue-badge {
+        display: inline-block;
+        background: var(--danger-bg);
+        color: var(--danger);
+        border: 1px solid var(--danger-bd);
+        border-radius: 9999px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        flex-shrink: 0;
+      }
+
+      .issue-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .issue-body {
+        padding: 12px 14px;
+      }
+
+      .issue-explanation {
+        font-size: 12px;
+        color: var(--text-sec);
+        line-height: 1.6;
+        margin-bottom: 10px;
+      }
+
+      .issue-fix {
+        background: var(--success-bg);
+        border: 1px solid var(--success-bd);
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 12px;
+        color: var(--success);
+        line-height: 1.6;
+      }
+
+      .issue-fix-label {
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 3px;
+      }
+
+      /* ── No issues state ── */
+      .no-issues {
+        background: var(--success-bg);
+        border: 1px solid var(--success-bd);
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 13px;
+        color: var(--success);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .no-issues svg {
+        width: 15px;
+        height: 15px;
+        stroke: var(--success);
+        fill: none;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        flex-shrink: 0;
+      }
+
+      /* ── Footer ── */
+      .page-footer {
+        margin-top: 52px;
+        padding-top: 14px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: var(--text-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Page header -->
+    <div class="page-header">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#0C0E12"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="12 2 2 7 12 12 22 7 12 2" />
+            <polyline points="2 17 12 22 22 17" />
+            <polyline points="2 12 12 17 22 12" />
+          </svg>
+        </div>
+        <span class="brand-name">Calibr<span>.</span></span>
+      </div>
+      <div class="header-right">
+        <div class="report-label">Score Summary — Report 1 of 4</div>
+        <div class="report-date">{{ timestamp | format_date }}</div>
+      </div>
+    </div>
+
+    <h1 class="page-title">Resume Score Summary</h1>
+
+    <!-- Score hero -->
+    <div class="score-hero">
+      <div class="score-hero-label">Overall ATS Score</div>
+      <div>
+        <span class="score-number" style="color: {{ score_color }};"
+          >{{ "%.0f" | format(overall_score) }}</span
+        >
+        <span class="score-denom">/100</span>
+      </div>
+      <div class="score-interp">
+        {% if interpretation %}{{ interpretation }} {% elif overall_score >= 80
+        %}Your resume is highly optimised for ATS screening. {% elif
+        overall_score >= 60 %}Good foundation. A few targeted improvements will
+        push this higher. {% else %}Significant revisions needed before
+        applying. Follow the recommendations below. {% endif %}
+      </div>
+    </div>
+
+    <!-- Score breakdown -->
+    <div class="section-heading">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24">
+          <line x1="18" y1="20" x2="18" y2="10" />
+          <line x1="12" y1="20" x2="12" y2="4" />
+          <line x1="6" y1="20" x2="6" y2="14" />
+        </svg>
+      </div>
+      <span class="section-title">Score Breakdown</span>
+    </div>
+
+    {% set rows = [ ('Keywords & Skills', component_scores.keywords, 25,
+    component_pct.keywords, 'Keyword density and JD relevance'), ('Content
+    Quality', component_scores.content, 25, component_pct.content, 'Action
+    verbs, metrics, achievements'), ('Formatting', component_scores.formatting,
+    20, component_pct.formatting, 'Structure, section headers, bullet points'),
+    ('Skill Validation', component_scores.skill_validation, 15,
+    component_pct.skill_validation, 'Skills backed by project evidence'), ('ATS
+    Compatibility', component_scores.ats_compatibility, 15,
+    component_pct.ats_compatibility, 'Clean formatting, no parsing blockers'), ]
+    %} {% for label, score, max_score, pct, sublabel in rows %} {% set bar_cls =
+    'bar-success' if pct >= 75 else ('bar-warning' if pct >= 50 else
+    'bar-danger') %} {% set score_color_val = '#2ECC8A' if pct >= 75 else
+    ('#F5A623' if pct >= 50 else '#F0503A') %}
+    <div class="breakdown-row">
+      <div class="breakdown-label">
+        <div class="breakdown-label-main">{{ label }}</div>
+        <div class="breakdown-label-sub">{{ sublabel }}</div>
+      </div>
+      <div class="breakdown-bar-wrap">
+        <div
+          class="breakdown-bar-fill {{ bar_cls }}"
+          style="width: {{ pct }}%;"
+        ></div>
+      </div>
+      <div class="breakdown-score" style="color: {{ score_color_val }};">
+        {{ "%.0f" | format(score) }}/{{ max_score }}
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- Strengths -->
+    <div class="section-heading">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24">
+          <polygon
+            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+          />
+        </svg>
+      </div>
+      <span class="section-title">Strengths</span>
+    </div>
+
+    {% if strengths %} {% for s in strengths %}
+    <div class="strength-item">
+      <span class="strength-check">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+      </span>
+      {{ s }}
+    </div>
+    {% endfor %} {% else %}
+    <p style="color: var(--text-sec); font-size: 13px">
+      No major strengths detected. Work through the recommendations to build
+      them.
+    </p>
+    {% endif %}
+
+    <!-- Critical issues -->
+    <div class="section-heading">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+          />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      </div>
+      <span class="section-title">Critical Issues</span>
+    </div>
+
+    {% if high_priority %} {% for issue in high_priority %}
+    <div class="issue-card">
+      <div class="issue-card-header">
+        <span class="issue-badge">High</span>
+        <span class="issue-title">{{ issue.issue_title }}</span>
+      </div>
+      <div class="issue-body">
+        {% if issue.explanation %}
+        <p class="issue-explanation">{{ issue.explanation }}</p>
+        {% endif %} {% if issue.how_to_fix %}
+        <div class="issue-fix">
+          <span class="issue-fix-label">How to fix</span>
+          {{ issue.how_to_fix }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %} {% else %}
+    <div class="no-issues">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+      No critical issues found. Review medium-priority items in the
+      Recommendations report.
+    </div>
+    {% endif %}
+
+    <div class="page-footer">
+      <span>Calibr — Resume Intelligence</span>
+      <span>Report 1 of 4 — Score Summary</span>
+    </div>
+  </body>
+</html>

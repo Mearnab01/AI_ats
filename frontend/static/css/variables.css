@@ -1,0 +1,89 @@
+/* ================================================================
+   CALIBR — Design Tokens
+   Dark professional theme with controlled amber accent
+================================================================ */
+
+:root {
+  /* ── Brand ── */
+  --brand:          #E8A44A;       /* amber — primary accent */
+  --brand-dim:      #C4852E;
+  --brand-glow:     rgba(232,164,74,.18);
+  --brand-subtle:   rgba(232,164,74,.08);
+
+  /* ── Backgrounds ── */
+  --bg-base:        #0C0E12;       /* deepest — body */
+  --bg-surface:     #111318;       /* cards, panels */
+  --bg-elevated:    #181B22;       /* raised surfaces */
+  --bg-overlay:     #1E2129;       /* dropdowns, modals */
+  --bg-hover:       rgba(255,255,255,.04);
+
+  /* ── Borders ── */
+  --border:         rgba(255,255,255,.08);
+  --border-strong:  rgba(255,255,255,.14);
+  --border-brand:   rgba(232,164,74,.35);
+
+  /* ── Text ── */
+  --text-primary:   #F0F2F5;
+  --text-secondary: #8C92A0;
+  --text-muted:     #555C6B;
+  --text-inverse:   #0C0E12;
+
+  /* ── Status ── */
+  --success:        #2ECC8A;
+  --success-bg:     rgba(46,204,138,.10);
+  --success-border: rgba(46,204,138,.25);
+
+  --warning:        #F5A623;
+  --warning-bg:     rgba(245,166,35,.10);
+  --warning-border: rgba(245,166,35,.25);
+
+  --danger:         #F0503A;
+  --danger-bg:      rgba(240,80,58,.10);
+  --danger-border:  rgba(240,80,58,.25);
+
+  --info:           #4A9EF5;
+  --info-bg:        rgba(74,158,245,.10);
+  --info-border:    rgba(74,158,245,.25);
+
+  /* ── Gradients ── */
+  --grad-brand:     linear-gradient(135deg, #E8A44A 0%, #C4852E 100%);
+  --grad-surface:   linear-gradient(180deg, #181B22 0%, #111318 100%);
+  --grad-card:      linear-gradient(145deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,0) 100%);
+
+  /* ── Shadows ── */
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.4);
+  --shadow-md:  0 4px 12px rgba(0,0,0,.5);
+  --shadow-lg:  0 12px 32px rgba(0,0,0,.6);
+  --shadow-brand: 0 0 24px rgba(232,164,74,.2);
+
+  /* ── Typography ── */
+  --font-display: 'Fraunces', 'Georgia', serif;   /* editorial serif display */
+  --font-body:    'DM Sans', 'Helvetica Neue', sans-serif;
+  --font-mono:    'DM Mono', 'Fira Code', monospace;
+
+  /* ── Radius ── */
+  --r-sm:   4px;
+  --r-md:   8px;
+  --r-lg:   12px;
+  --r-xl:   16px;
+  --r-full: 9999px;
+
+  /* ── Spacing scale ── */
+  --sp-1: .25rem;
+  --sp-2: .5rem;
+  --sp-3: .75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.25rem;
+  --sp-6: 1.5rem;
+  --sp-8: 2rem;
+  --sp-10:2.5rem;
+  --sp-12:3rem;
+
+  /* ── Motion ── */
+  --ease-out:   cubic-bezier(.22,.68,0,1.2);
+  --ease-in-out:cubic-bezier(.4,0,.2,1);
+  --dur-fast:   120ms;
+  --dur-base:   200ms;
+  --dur-slow:   340ms;
+  --dur-slower: 520ms;
+}
