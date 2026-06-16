@@ -34,6 +34,8 @@ SPACY_MODEL_PRIMARY="en_core_web_md" #better accuracy
 SPACY_MODEL_SECONDARY='"en_core_web_sm' 
 SENTENCE_TRANSFORMER_MODEL = os.getenv("SENTENCE_TRANSFORMER_MODEL", "all-MiniLM-L6-v2")
 
+FALLBACK_MODEL = "all-mpnet-base-v2"
+
 # Score component weights — this is business logic treated as config
 SCORE_WEIGHTS = {
     "formatting": 20, "keywords": 25, "content": 25,
