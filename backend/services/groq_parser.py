@@ -6,7 +6,7 @@ from typing import Dict
 from groq import Groq
 from backend.core.logger import setup_logger
 
-logger = setup_logger("ats_resume_scorer")
+logger = setup_logger("ats_resume_scorer | groq parser")
  
 GROQ_MODEL = "llama-3.3-70b-versatile"
 

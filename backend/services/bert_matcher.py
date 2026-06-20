@@ -12,7 +12,7 @@ from backend.core.logger import setup_logger
 from sentence_transformers import SentenceTransformer
 
 
-logger = setup_logger("bert_matcher")
+logger = setup_logger("ats_resume_scorer | bert_matcher")
 
 _PROJECT_ROOT    = Path(__file__).resolve().parents[2]
 _FINETUNED_PATH  = _PROJECT_ROOT / "ml model" / "models" / "finetuned-bert"

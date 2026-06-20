@@ -4,7 +4,7 @@ import os
 from typing import Any, Callable, Dict, Optional, Tuple, TypeVar
 from backend.core.logger import setup_logger
 
-logger = setup_logger("ats_resume_scorer")
+logger = setup_logger("ats_resume_scorer | file_utils")
 
 
 

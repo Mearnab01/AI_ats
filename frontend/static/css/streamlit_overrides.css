@@ -1,5 +1,5 @@
 /* ================================================================
-   CALIBR — Streamlit-Specific Overrides
+   Criterion — Streamlit-Specific Overrides
    Flat selectors only. No deep nesting.
    Injected via st.markdown(<style>...</style>, unsafe_allow_html=True)
 ================================================================ */

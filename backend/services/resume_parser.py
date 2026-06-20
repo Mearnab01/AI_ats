@@ -22,7 +22,7 @@ from backend.core.config import (
     SUPPORTED_MIME_TYPES
 )
 
-logger = setup_logger("ResumeParser")
+logger = setup_logger("ats_resume_scorer | resume_parser")
 
 class FileParsingError(Exception):
     """Custom exception for file parsing errors."""

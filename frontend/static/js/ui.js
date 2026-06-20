@@ -1,17 +1,3 @@
-/**
- * calibr/ui.js
- *
- * Minimal vanilla JS that enhances the Streamlit UI.
- * Injected via st.components.v1.html() or st.markdown().
- *
- * Modules:
- *   1. Progress bar staggered entrance (runs once on DOM ready)
- *   2. Score number count-up animation
- *   3. Drag-and-drop upload zone highlight
- *   4. Smooth scroll to results after analysis
- *   5. Intersection Observer — fade-up cards on scroll
- */
-
 (function () {
   "use strict";
 
@@ -167,5 +153,5 @@
   }
 
   // Expose scrollToResults for Python to call via st.components
-  window.calibrScrollToResults = scrollToResults;
+  window.CriterionScrollToResults = scrollToResults;
 })();

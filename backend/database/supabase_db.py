@@ -6,7 +6,7 @@ from typing import List, Optional, Dict
 from backend.core.logger import setup_logger
 from backend.core.config import SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 
-logger = setup_logger("supabase_db")
+logger = setup_logger("ats_resume_scorer | supabase_db")
 
 
 def _get_headers():
