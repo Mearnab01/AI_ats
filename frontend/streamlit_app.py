@@ -149,7 +149,7 @@ with st.sidebar:
             </div>
             <div style="display:flex;align-items:center;gap:8px;padding:5px 0;">
                 <div style="width:6px;height:6px;border-radius:50%;background:#4A9EF5;box-shadow:0 0 6px #4A9EF5;flex-shrink:0;"></div>
-                <div><div style="font-size:12px;font-weight:600;color:#F0F2F5;">spaCy en_core_web_lg</div><div style="font-size:10px;color:#555C6B;">NER · privacy check</div></div>
+                <div><div style="font-size:12px;font-weight:600;color:#F0F2F5;">spaCy en_core_web_md</div><div style="font-size:10px;color:#555C6B;">NER · privacy check</div></div>
             </div>
         </div>
         """,
