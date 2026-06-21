@@ -1,5 +1,3 @@
-"""services/api_client.py — HTTP client for the Calibr FastAPI backend."""
-
 from __future__ import annotations
 
 from io import BytesIO
@@ -22,16 +20,7 @@ def analyze_resume(
 ) -> Dict[str, Any]:
     """
     POST /api/v1/analyze-resume
-
-    Parameters
-    ----------
-    file : Streamlit UploadedFile
-    job_description : str
-    access_token    : str
-
-    Returns
-    -------
-    dict  Full analysis result
+    
     """
     file_bytes = file.read() if hasattr(file, "read") else file
     file_name  = getattr(file, "name", "resume.pdf")
@@ -67,6 +56,15 @@ def delete_history(analysis_id: str, access_token: str) -> None:
     )
     resp.raise_for_status()
 
+def download_history_pdf(analysis_id: str, access_token: str) -> bytes:
+    """GET /api/v1/history/{analysis_id}/pdf"""
+    resp = requests.get(
+        f"{_BASE}/history/{analysis_id}/pdf",
+        headers = _headers(access_token),
+        timeout = _TIMEOUT,
+    )
+    resp.raise_for_status()
+    return resp.content
 
 def get_health() -> Dict[str, Any]:
     """GET /api/v1/health — returns model status."""

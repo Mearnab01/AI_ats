@@ -2,6 +2,12 @@ import sys
 from pathlib import Path
 
 import streamlit as st
+from services import supabase_client
+from services.auth_utils import (
+    ensure_valid_session,
+    _store_session,
+    _clear_session
+)
 import streamlit.components.v1 as components
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -63,6 +69,7 @@ _load_js()
 for key, default in [
     ("access_token",  None),
     ("refresh_token", None),
+    ("token_expires_at", None),
     ("user_id",       None),
     ("user_email",    None),
     ("auth_error",    None),
@@ -72,18 +79,17 @@ for key, default in [
     if key not in st.session_state:
         st.session_state[key] = default
 
+
+
 # ── Google OAuth code exchange ──────────────────────────────────────────────────
 if not st.session_state.access_token and "code" in st.query_params:
-    from frontend.services import supabase_client
+    
     result = supabase_client.exchange_code_for_session(st.query_params["code"])
     st.query_params.clear()
     if "error" in result:
         st.session_state.auth_error = f"Sign-in failed: {result['error']}"
     else:
-        st.session_state.access_token  = result["access_token"]
-        st.session_state.refresh_token = result["refresh_token"]
-        st.session_state.user_id       = result["user_id"]
-        st.session_state.user_email    = result["email"]
+        _store_session(result)
         st.rerun()
 
 # ── Sidebar ────────────────────────────────────────────────────────────────────
@@ -110,20 +116,20 @@ with st.sidebar:
     )
 
     nav_items = [
-        ("landing",   "Home",     "M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"),
-        ("scorer",    "Analyse",  "M13 2 3 14 12 14 11 22 21 10 12 10 13 2"),
-        ("history",   "History",  "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"),
+        ("landing", "Home"),
+        ("scorer",  "Analyse"),
+        ("history", "History"),
     ]
 
-    for view_key, label, icon_path in nav_items:
+    for view_key, label in nav_items:
         is_active = st.session_state.current_view == view_key
         bg      = "rgba(232,164,74,.07)" if is_active else "transparent"
-        color   = "#E8A44A"              if is_active else "#8C92A0"
+        color   = "#E8A44A" if is_active else "#8C92A0"
         border  = "1px solid rgba(232,164,74,.2)" if is_active else "1px solid transparent"
 
         if st.button(
             label,
-            key        = f"nav_{view_key}",
+            key = f"nav_{view_key}",
             use_container_width=True,
         ):
             st.session_state.current_view = view_key
@@ -153,6 +159,15 @@ with st.sidebar:
 
     # Auth state
     st.markdown("<hr style='border-color:rgba(255,255,255,.06);margin:20px 0;'>", unsafe_allow_html=True)
+    if st.session_state.auth_error:
+        st.markdown(
+            f'<div style="background:rgba(240,80,58,.08);border:1px solid rgba(240,80,58,.2);'
+            f'border-radius:8px;padding:8px 12px;font-size:12px;color:#F0503A;margin-bottom:10px;">'
+            f'{st.session_state.auth_error}</div>',
+            unsafe_allow_html=True,
+        )
+        st.session_state.auth_error = None 
+        
     if st.session_state.user_email:
         st.markdown(
             f'<div style="font-size:12px;color:#8C92A0;">'
@@ -160,11 +175,21 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
         if st.button("Sign out", use_container_width=True):
-            for k in ("access_token","refresh_token","user_id","user_email"):
-                st.session_state[k] = None
+            
+            result = supabase_client.sign_out(st.session_state.access_token or "")
+            if "error" in result:
+                st.session_state.auth_error = f"Sign-out failed: {result['error']}"
+            _clear_session()
             st.rerun()
     else:
         st.markdown('<div style="font-size:12px;color:#555C6B;margin-bottom:8px;">Not signed in</div>', unsafe_allow_html=True)
+        oauth_url = supabase_client.get_google_oauth_url(
+            "http://localhost:8501"
+        )
+        st.link_button("Sign in with Google", oauth_url, use_container_width=True)
+            
+            
+        
 
 # ── Route ──────────────────────────────────────────────────────────────────────
 view = st.session_state.current_view

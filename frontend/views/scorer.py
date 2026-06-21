@@ -1,5 +1,3 @@
-"""views/scorer.py — Resume upload and analysis trigger."""
-
 from __future__ import annotations
 import requests
 import streamlit as st
@@ -115,15 +113,31 @@ def render() -> None:
         )
 
     if run and resume_file:
-        access_token = st.session_state.get("access_token")
+        from frontend.services.auth_utils import ensure_valid_session
+        access_token = ensure_valid_session()
 
-        with st.spinner("Running analysis pipeline…"):
+        if not access_token:
+            st.markdown(
+                alert("Your session has expired or you're not signed in. Please sign in to run an analysis.", "warning"),
+                unsafe_allow_html=True,
+            )
+            return
+        with st.spinner("Analyzing resume… This may take up to 30 seconds."):
             try:
                 result = api_client.analyze_resume(
-                    file            = resume_file,
-                    job_description = job_description or "",
-                    access_token    = access_token or "",
+                    file = resume_file,
+                    job_description   = job_description or "",
+                    access_token     = access_token,
                 )
+            except requests.HTTPError as exc:
+                if exc.response is not None and exc.response.status_code == 401:
+                    st.markdown(
+                        alert("Your session was rejected by the server. Please sign out and sign in again.", "danger"),
+                        unsafe_allow_html=True,
+                    )
+                    return
+                _show_backend_error(exc)
+                return
             except requests.RequestException as exc:
                 _show_backend_error(exc)
                 return

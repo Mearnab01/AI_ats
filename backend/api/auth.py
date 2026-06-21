@@ -60,10 +60,6 @@ def _verify_token(token: str) -> dict:
 def get_current_user(
     creds: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
 ) -> str:
-    import os
-    if os.getenv("DEBUG_SKIP_AUTH", "0") == "1":
-        logger.warning("AUTH BYPASS ENABLED - DEVELOPMENT MODE")
-        return "550e8400-e29b-41d4-a716-446655440000"
     if creds is None or not creds.credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
