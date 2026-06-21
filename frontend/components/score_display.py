@@ -1,10 +1,8 @@
-"""score_display.py — Overall score hero + component breakdown bars."""
-
 from __future__ import annotations
 from typing import Any, Dict
 
 import streamlit as st
-from frontend.components.helpers import (
+from frontend.components._helpers import (
     card, section_header, progress_bar, bar_color, score_color, badge,
 )
 
@@ -26,8 +24,7 @@ def display_score_header(analysis: Dict[str, Any]) -> None:
             <div style="position:relative;">
                 <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;
                             color:#555C6B;margin-bottom:16px;">Overall ATS Score</div>
-                <div class="score-hero-number animate-count-up" data-score="{overall:.0f}"
-                     style="font-family:'Fraunces',serif;font-size:80px;font-weight:700;
+                <div style="font-family:'Fraunces',serif;font-size:80px;font-weight:700;
                             color:{color};line-height:1;letter-spacing:-4px;">
                     {overall:.0f}<span style="font-size:32px;font-weight:400;color:#555C6B;">/100</span>
                 </div>
@@ -59,27 +56,39 @@ def display_component_breakdown(analysis: Dict[str, Any]) -> None:
         ("ATS Compatibility",  "Clean format, no parse blockers",   _get("ats_compatibility"), 15),
     ]
 
-    rows_html = ""
+    # Render header
+    st.markdown(
+        f'<div style="background:#111318;border:1px solid rgba(255,255,255,.08);'
+        f'border-radius:16px;padding:20px 24px;position:relative;overflow:hidden;">'
+        f'<div style="position:absolute;inset:0;background:linear-gradient(145deg,rgba(255,255,255,.025) 0%,transparent 100%);pointer-events:none;"></div>'
+        f'{section_header("chart", "Score Breakdown", "Five weighted components")}',
+        unsafe_allow_html=True,
+    )
+
+    # Render each row as native Streamlit columns to avoid deep nested HTML
     for label, sub, val, max_val in rows:
         pct   = (val / max_val) * 100 if max_val else 0
         color = score_color(val / max_val * 100) if max_val else "#8C92A0"
-        rows_html += f"""
-        <div style="display:flex;align-items:center;gap:16px;padding:10px 0;
-                    border-bottom:1px solid rgba(255,255,255,.06);">
-            <div style="width:152px;flex-shrink:0;">
-                <div style="font-size:13px;font-weight:600;color:#F0F2F5;">{label}</div>
-                <div style="font-size:11px;color:#555C6B;margin-top:2px;">{sub}</div>
-            </div>
-            <div style="flex:1;">{progress_bar(pct, bar_color(pct / 100))}</div>
-            <div style="width:52px;text-align:right;font-size:13px;font-weight:700;
-                        color:{color};flex-shrink:0;">{val:.0f}/{max_val}</div>
-        </div>
-        """
+        r1, r2, r3 = st.columns([2, 3, 1])
+        with r1:
+            st.markdown(
+                f'<div style="padding:8px 0;">'
+                f'<div style="font-size:13px;font-weight:600;color:#F0F2F5;">{label}</div>'
+                f'<div style="font-size:11px;color:#555C6B;margin-top:2px;">{sub}</div>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+        with r2:
+            st.markdown(
+                f'<div style="padding:14px 0;">{progress_bar(pct, bar_color(pct / 100))}</div>',
+                unsafe_allow_html=True,
+            )
+        with r3:
+            st.markdown(
+                f'<div style="text-align:right;padding:8px 0;font-size:13px;font-weight:700;color:{color};">'
+                f'{val:.0f}/{max_val}</div>',
+                unsafe_allow_html=True,
+            )
+        st.markdown('<div style="height:1px;background:rgba(255,255,255,.06);"></div>', unsafe_allow_html=True)
 
-    st.markdown(
-        card(
-            section_header("chart", "Score Breakdown", "Five weighted components")
-            + f'<div style="margin-top:-4px;">{rows_html}</div>'
-        ),
-        unsafe_allow_html=True,
-    )
+    st.markdown('</div>', unsafe_allow_html=True)

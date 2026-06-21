@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Any, Dict, List
 
 import streamlit as st
-from frontend.components.helpers import card, section_header, severity_badge, svg_icon
+from frontend.components._helpers import card, section_header, severity_badge, svg_icon
 
 
 _ORDER   = ["critical", "high", "medium", "moderate", "low"]

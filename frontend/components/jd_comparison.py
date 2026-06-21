@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 import streamlit as st
-from frontend.components.helpers import card, section_header, progress_bar, bar_color, pill, svg_icon
+from frontend.components._helpers import card, section_header, progress_bar, bar_color, pill, svg_icon
 
 
 def display_jd_comparison(analysis: Dict[str, Any]) -> None:

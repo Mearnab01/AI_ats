@@ -1,119 +1,138 @@
-from __future__ import annotations
 import os
 from typing import Any, Dict
+import streamlit as st
+from supabase import Client, create_client
+from dotenv import load_dotenv
+import logging 
 
-import requests
+load_dotenv()  
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("supabase_client")
 
 _URL = os.getenv("SUPABASE_URL", "")
-_KEY = os.getenv("SUPABASE_KEY", "")
+_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 _TIMEOUT = 15  # seconds
-
-def _headers(access_token: str = "") -> Dict[str, str]:
-    h = {"apikey": _KEY, "Content-Type": "application/json"}
-    if access_token:
-        h["Authorization"] = f"Bearer {access_token}"
-    return h
-
-def get_google_oauth_url(redirect_url: str) -> str:
-    """Return the Google OAuth sign-in URL."""
-    return (
-        f"{_URL}/auth/v1/authorize"
-        f"?provider=google"
-        f"&redirect_to={redirect_url}"
-    )
-
-
-def exchange_code_for_session(code: str) -> Dict[str, Any]:
-    """Exchange an OAuth code for a Supabase session."""
-    try:
-        resp = requests.post(
-            f"{_URL}/auth/v1/token?grant_type=pkce",
-            headers=_headers(),
-            json={"auth_code": code},
-            timeout=_TIMEOUT,
-        )
-    except requests.RequestException as exc:
-        return {"error": f"Network error during sign-in: {exc}"}
     
-    if not resp.ok:
-        return {"error": resp.text}
-    data = resp.json()
+
+OAUTH_REDIRECT_URL = (
+    os.getenv('AUTH_REDIRECT_URL')
+    or 'http://localhost:8501'
+)
+    
+def _missing_config() -> str | None:
+    if not _URL or not _KEY:
+        return 'Supabase is not configured — set SUPABASE_URL and SUPABASE_ANON_KEY in .env or .streamlit/secrets.toml'
+    return None
+
+@st.cache_resource
+def get_client() -> Client:
+    if _missing_config():
+        logger.error(_missing_config())
+        
+    return create_client(_URL, _KEY)
+
+
+def _session_dict(session, user):
     return {
-        "access_token":  data.get("access_token", ""),
-        "refresh_token": data.get("refresh_token", ""),
-        "expires_in":    data.get("expires_in", 3600),
-        "user_id":       data.get("user", {}).get("id", ""),
-        "email":         data.get("user", {}).get("email", ""),
+        "access_token":  session.access_token,
+        "refresh_token": session.refresh_token,
+        "expires_in":    session.expires_in,
+        "user_id":       user.id,
+        "email":         user.email,
+        "metadata":      user.user_metadata or {},
     }
+ 
+def google_oauth_url() -> Dict[str, Any]:
+    err = _missing_config()
+    if err:
+        return {"error": err}
+    try:
+        resp = get_client().auth.sign_in_with_oauth({
+            'provider': 'google',
+            'options': { 'redirect_to': OAUTH_REDIRECT_URL }
+        })
+        return {"url": resp.url}
+    except Exception as exc:
+        logger.error(f"Error during Google OAuth sign-in: {exc}")
+        return {"error": f"Error during Google OAuth sign-in: {exc}"}
+
+def exchange_code_for_session(auth_code: str) -> Dict[str, Any]:
+    err = _missing_config()
+    if err:
+        return {"error": err}
+    client = get_client()
+    try:
+        storage_key = f'{client.auth._storage_key}-code-verifier'
+        code_verifier = client.auth._storage.get_item(storage_key) or ""
+        
+        # ===== DEBUG START =====
+        logger.info("=" * 50)
+        logger.info(f"Auth Code: {auth_code}")
+        logger.info(f"Storage Key: {storage_key}")
+        logger.info(f"Code Verifier Exists: {bool(code_verifier)}")
+        logger.info(f"Code Verifier Length: {len(code_verifier)}")
+        logger.info(f"Redirect URL: {OAUTH_REDIRECT_URL}")
+        logger.info("=" * 50)
+        # ===== DEBUG END =====
+        
+        resp = client.auth.exchange_code_for_session({
+            'auth_code': auth_code,
+            'code_verifier': code_verifier,
+            'redirect_to': OAUTH_REDIRECT_URL
+        })
+        
+        # ===== DEBUG RESPONSE =====
+        logger.info(f"Response Session: {resp.session}")
+        logger.info(f"Response User: {resp.user}")
+        # ===== DEBUG RESPONSE =====
+        
+        if not resp.session or not resp.user:
+            return {"error": "Failed to exchange code for session."}
+        return _session_dict(resp.session, resp.user)
+    except Exception as exc:
+        logger.error(f"Error during code exchange: {exc}")
+        return {"error": f"Error during code exchange: {exc}"}
+
     
 # ── Session refresh ────────────────────────────────────────────────────────────
  
 def refresh_session(refresh_token: str) -> Dict[str, Any]:
-    if not refresh_token:
-        return {"error": "Missing refresh token."}
-    
+    if _missing_config():
+        logger.error(_missing_config())
+        return {"error": _missing_config()}
     try:
-        resp = requests.post(
-            f"{_URL}/auth/v1/token?grant_type=refresh_token",
-            headers=_headers(),
-            json={"refresh_token": refresh_token},
-            timeout=_TIMEOUT,
-        )
-    except requests.RequestException as exc:
-        return {"error": f"Network error during session refresh: {exc}"}
-    
-    if not resp.ok:
-        return {"error": resp.text}
-    
-    data = resp.json()
-    return {
-        "access_token":  data.get("access_token", ""),
-        "refresh_token": data.get("refresh_token", ""),
-        "expires_in":    data.get("expires_in", 3600),
-        "user_id":       data.get("user", {}).get("id", ""),
-        "email":         data.get("user", {}).get("email", ""),
-    }
+        resp = get_client().auth.refresh_session(refresh_token)
+        if not resp.session or not resp.user:
+            return {"error": "Failed to refresh session."}
+        return _session_dict(resp.session, resp.user)
+    except Exception as exc:
+        logger.error(f"Error during session refresh: {exc}")
+        return {"error": f"Error during session refresh: {exc}"}
     
 # ── Sign out ───────────────────────────────────────────────────────────────────
  
-def sign_out(access_token: str) -> Dict[str, Any]:
-    if not access_token:
-        return {"ok": True} # No access token means the user is already signed out.
-    
+def sign_out()-> None:
+    if _missing_config():
+        logger.error(_missing_config())
+        return
     try:
-        resp = requests.post(
-            f"{_URL}/auth/v1/logout",
-            headers=_headers(access_token),
-            timeout=_TIMEOUT,
-        )
-    except requests.RequestException as exc:
-        return {"error": f"Network error during sign-out: {exc}"}
-    
-    if resp.status_code not in (200, 204):
-        return {"error": resp.text}
-    return {"ok": True}
+        get_client().auth.sign_out()
+    except Exception as exc:
+        logger.error(f"Error during sign-out: {exc}")
+        return {"error": f"Error during sign-out: {exc}"}
 
 # ── Get current user ───────────────────────────────────────────────────────────
  
 def get_user(access_token: str) -> Dict[str, Any]:
-    if not access_token:
-        return {"error": "Missing access token."}
-    
+    if _missing_config():
+        logger.error(_missing_config())
+        return {"error": _missing_config()}
     try:
-        resp = requests.get(
-            f"{_URL}/auth/v1/user",
-            headers=_headers(access_token),
-            timeout=_TIMEOUT,
-        )
-    except requests.RequestException as exc:
-        return {"error": f"Network error during get user: {exc}"}
-    
-    if not resp.ok:
-        return {"error": resp.text}
-    
-    data = resp.json()
-    return {
-        "user_id": data.get("id", ""),
-        "email":   data.get("email", ""),
-        "metadata": data.get("user_metadata", {}),
-    }
+        resp = get_client().auth.get_user(access_token)
+        if not resp.user:
+            return {"error": "Failed to retrieve user."}
+        return _session_dict(resp.session, resp.user)
+    except Exception as exc:
+        logger.error(f"Error retrieving user: {exc}")
+        return {"error": f"Error retrieving user: {exc}"}

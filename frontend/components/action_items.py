@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Tuple
 
 import streamlit as st
-from frontend.components.helpers import card, section_header, svg_icon
+from frontend.components._helpers import card, section_header, svg_icon
 
 _RANK = {"critical": 0, "high": 1, "medium": 2, "moderate": 3, "low": 4}
 

@@ -1,8 +1,25 @@
 import streamlit as st
-from frontend.components.helpers import svg_icon
+from frontend.components._helpers import svg_icon
 
 
 def render() -> None:
+    # ── Welcome banner (if logged in) ─────────────────────────────
+    if st.session_state.get("user_email"):
+        username = st.session_state.user_email.split("@")[0]
+        st.markdown(
+            f'<div style="display:flex;align-items:center;gap:10px;'
+            f'background:rgba(232,164,74,.06);border:1px solid rgba(232,164,74,.15);'
+            f'border-radius:12px;padding:12px 18px;margin-bottom:20px;">'
+            f'<div style="width:32px;height:32px;background:linear-gradient(135deg,#E8A44A,#C4852E);'
+            f'border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+            f'<span style="font-size:14px;font-weight:700;color:#0C0E12;">{username[0].upper()}</span></div>'
+            f'<div>'
+            f'<span style="font-size:13px;color:#8C92A0;">Welcome back, </span>'
+            f'<span style="font-size:13px;font-weight:700;color:#E8A44A;">{username}</span>'
+            f'</div></div>',
+            unsafe_allow_html=True,
+        )
+
     # ── Hero ──────────────────────────────────────────────────────
     st.markdown(
         """
@@ -72,7 +89,7 @@ def render() -> None:
 
     # ── Features ──────────────────────────────────────────────────
     st.markdown(
-        '<h2 style="font-family:\'Fraunces\',serif;font-size:20px;color:#F0F2F5;margin-bottom:16px;">What Calibr does</h2>',
+        '<h2 style="font-family:\'Fraunces\',serif;font-size:20px;color:#F0F2F5;margin-bottom:16px;">What Criterion does</h2>',
         unsafe_allow_html=True,
     )
 

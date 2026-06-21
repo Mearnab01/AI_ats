@@ -8,7 +8,7 @@ from frontend.components.skill_validation    import display_skill_validation
 from frontend.components.jd_comparison       import display_jd_comparison
 from frontend.components.detailed_feedback   import display_detailed_feedback
 from frontend.components.action_items        import display_action_items
-from frontend.components.helpers            import card, section_header, svg_icon
+from frontend.components._helpers            import card, section_header, svg_icon
 
 
 def display_results(analysis: Dict[str, Any]) -> None:
@@ -135,7 +135,7 @@ def _handle_pdf_export(analysis: Dict[str, Any]) -> None:
             st.download_button(
                 label    = "Download PDF",
                 data     = resp.content,
-                file_name= "calibr_report.pdf",
+                file_name= f"{analysis.get('resume_id', 'unknown')}_criterion_report.pdf",
                 mime     = "application/pdf",
             )
         else:
@@ -148,7 +148,7 @@ def _build_txt_summary(analysis: Dict[str, Any]) -> str:
     score = float(analysis.get("ATS_score") or analysis.get("ats_score") or 0)
     cs    = analysis.get("component_scores") or {}
     lines = [
-        "CALIBR — Resume Analysis Summary",
+        "CRITERION — Resume Analysis Summary",
         "=" * 40,
         f"Overall ATS Score: {score:.0f}/100",
         "",

@@ -4,6 +4,7 @@
 from __future__ import annotations
 import json
 import os
+import streamlit as st
 import numpy as np
 from functools import lru_cache
 from pathlib import Path
@@ -22,7 +23,7 @@ _FALLBACK_MODEL  = "all-mpnet-base-v2"
 _CHUNK_SIZE    = 1_500   # chars ≈ 375 tokens, well within 512
 _CHUNK_OVERLAP = 200
 
-@lru_cache(maxsize=1)
+@st.cache_resource(show_spinner=False)
 def _load_model() -> tuple[SentenceTransformer, bool, dict]:
     if _FINETUNED_PATH.exists():
         try:
@@ -67,7 +68,7 @@ def get_model_info() -> dict:
     }
 
 
-@lru_cache(maxsize=512)
+@st.cache_resource(show_spinner=False)
 def _encode_cached(text: str, model_id: int) -> tuple:
     model, _, _ = _load_model()
     vec = model.encode(text, convert_to_tensor=False, normalize_embeddings=True)

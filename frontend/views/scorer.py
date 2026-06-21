@@ -3,7 +3,7 @@ import requests
 import streamlit as st
 
 from frontend.services  import api_client
-from frontend.components.helpers import svg_icon, alert, card, section_header
+from frontend.components._helpers import svg_icon, alert, card, section_header
 from frontend.components.dashboard import display_results
 
 
@@ -107,7 +107,7 @@ def render() -> None:
     with col_btn:
         run = st.button(
             "Run Analysis" if not run_disabled else "Upload a resume to begin",
-            type    = "primary",
+            type    = "secondary",
             disabled= run_disabled,
             use_container_width=True,
         )

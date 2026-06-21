@@ -4,7 +4,6 @@ from pathlib import Path
 import streamlit as st
 from services import supabase_client
 from services.auth_utils import (
-    ensure_valid_session,
     _store_session,
     _clear_session
 )
@@ -170,23 +169,31 @@ with st.sidebar:
         
     if st.session_state.user_email:
         st.markdown(
-            f'<div style="font-size:12px;color:#8C92A0;">'
-            f'<span style="color:#E8A44A;font-weight:600;">{st.session_state.user_email}</span></div>',
+            f'<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">'
+            f'<div style="width:6px;height:6px;border-radius:50%;background:#2ECC8A;flex-shrink:0;"></div>'
+            f'<span style="font-size:12px;color:#E8A44A;font-weight:600;word-break:break-all;">'
+            f'{st.session_state.user_email}</span></div>',
             unsafe_allow_html=True,
         )
         if st.button("Sign out", use_container_width=True):
             
-            result = supabase_client.sign_out(st.session_state.access_token or "")
+            result = supabase_client.sign_out()
             if "error" in result:
                 st.session_state.auth_error = f"Sign-out failed: {result['error']}"
             _clear_session()
             st.rerun()
     else:
         st.markdown('<div style="font-size:12px;color:#555C6B;margin-bottom:8px;">Not signed in</div>', unsafe_allow_html=True)
-        oauth_url = supabase_client.get_google_oauth_url(
-            "http://localhost:8501"
-        )
-        st.link_button("Sign in with Google", oauth_url, use_container_width=True)
+        oauth = supabase_client.google_oauth_url()
+        if "error" in oauth:
+            st.markdown(
+                f'<div style="background:rgba(240,80,58,.08);border:1px solid rgba(240,80,58,.2);'
+                f'border-radius:8px;padding:8px 12px;font-size:12px;color:#F0503A;margin-bottom:10px;">'
+                f'{oauth["error"]}</div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            st.link_button("Sign in with Google", oauth["url"], use_container_width=True)
             
             
         

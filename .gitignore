@@ -27,7 +27,7 @@ MANIFEST
 .env
 .env.local
 .env.*.local
-.streamlit/secrets.toml
+frontend/streamlit/*
 supabase/.temp/
 
 # --- IDE & Editors ---
