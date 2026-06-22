@@ -39,10 +39,15 @@ def display_critical_issues(analysis: Dict[str, Any]) -> None:
         if (f.get("severity_level") or "low").lower() in ("critical", "high")
     ]
 
-    count = len(high)
+    # Fallback: plain strings from backend critical_issues field
+    flat: List[str] = []
+    if not high:
+        flat = [str(i) for i in (analysis.get("critical_issues") or []) if i]
+
+    count = len(high) + len(flat)
     hdr = section_header("alert", "Critical Issues", str(count) + " high-priority item(s)")
 
-    if not high:
+    if not high and not flat:
         check = svg_icon("check", 15, "#2ECC8A")
         body = (
             '<div style="background:rgba(46,204,138,.06);border:1px solid rgba(46,204,138,.2);'
@@ -103,6 +108,16 @@ def display_critical_issues(analysis: Dict[str, Any]) -> None:
             '<div style="padding:12px 16px;">'
             + expl_html + impact_html + fix_html +
             '</div></div>',
+            unsafe_allow_html=True,
+        )
+
+    for item in flat:
+        st.markdown(
+            '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;'
+            'border-bottom:1px solid rgba(255,255,255,.05);">'
+            + svg_icon("alert", 14, "#F0503A")
+            + '<span style="font-size:13px;color:#8C92A0;line-height:1.5;">' + item + '</span>'
+            '</div>',
             unsafe_allow_html=True,
         )
 

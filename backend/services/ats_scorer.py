@@ -8,11 +8,17 @@ from backend.core.logger import setup_logger
 from backend.core.config import SENTENCE_TRANSFORMER_MODEL
 from backend.utils.matching import fuzzy_match_keywords
 
-ZIP_CODE_PATTERN = r'\b\d{5}(?:-\d{4})?\b'
-
+ZIP_CODE_PATTERN = r'\b\d{6}\b|\b\d{5}(?:-\d{4})?\b'
 STREET_ADDRESS_PATTERN = (
+    # Western: "123 Main Street"
     r'\b\d+\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s+'
     r'(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Circle|Cir|Way|Place|Pl)\b'
+    r'|'
+    # Indian flat/house: "Flat 4A", "House No 23", "Block B", "Plot 12"
+    r'\b(?:Flat|House|H\.?No\.?|Plot|Door|Road|Block|Sector|Wing)\s*[#\-]?\s*\w+\b'
+    r'|'
+    # Indian unit code: "J-106", "A-12"
+    r'\b[A-Z]-\d+\b'
 )
 
 logger = setup_logger("ats_scorer")

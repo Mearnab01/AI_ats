@@ -15,7 +15,7 @@ logger = setup_logger("ats_resume_scorer | backend api routes")
 
 router = APIRouter(prefix="/api/v1", tags=["Analysis"])
 
-_STRIP_PREFIXES = ("✅","🌟","❌","⚠️","📝","🔴","🟡","🟢","🟠","👍","✔","•","-"," ")
+_STRIP_PREFIXES = ("✅","🌟","❌","⚠️","📝","🔴","🟡","🟢","🟠","👍","✔","•","-")
 
 def _clean(text: str) -> str:
     for ch in _STRIP_PREFIXES:
@@ -112,6 +112,7 @@ async def analyze_resume(
     except Exception as db_exc:
         logger.warning("DB save skipped: %s", db_exc)
 
+    bert_info = result.get("bert_model_info") or {}
     return AnalysisResponse(
         ATS_score                = float(result.get("ATS_score", 0)),
         ats_score                = float(result.get("ats_score",  0)),
@@ -129,6 +130,12 @@ async def analyze_resume(
         skills                   = result.get("skills", []),
         warnings                 = [],
         interpretation           = result.get("interpretation", ""),
+        bert_model_info          = {
+            "using_finetuned": bert_info.get("using_finetuned", False),
+            "finetuned_mae":   bert_info.get("finetuned_mae"),
+            "base_mae":        bert_info.get("base_mae"),
+            "improvement_pct": bert_info.get("improvement_pct"),
+        },
     )
 
 

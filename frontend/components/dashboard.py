@@ -12,7 +12,7 @@ from frontend.components.recommendations     import display_recommendations
 
 from frontend.components._helpers            import card, section_header, svg_icon
 
-
+ 
 def display_results(analysis: Dict[str, Any]) -> None:
     """Render the full results dashboard."""
 
@@ -56,7 +56,7 @@ def display_results(analysis: Dict[str, Any]) -> None:
         display_skill_validation(analysis)
     with col4:
         display_jd_comparison(analysis)
-        
+         
     st.markdown("<div style='height:16px;'></div>", unsafe_allow_html=True)
 
     # ── Critical issues ───────────────────────────────────────────

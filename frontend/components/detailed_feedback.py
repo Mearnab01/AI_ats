@@ -50,18 +50,7 @@ def display_detailed_feedback(analysis: Dict[str, Any]) -> None:
                 expl    = issue.get("explanation",      "")
                 where   = issue.get("where_it_appears", "")
                 fix     = issue.get("how_to_fix",       "")
-                actions = issue.get("action_items")  or []
                 example = issue.get("example_improvement", "")
-
-                action_html = ""
-                if actions:
-                    lis = "".join(
-                        f'<li style="padding:5px 0 5px 20px;font-size:12px;color:#8C92A0;'
-                        f'border-bottom:1px solid rgba(255,255,255,.05);position:relative;">'
-                        f'<span style="position:absolute;left:0;color:#555C6B;">→</span>{a}</li>'
-                        for a in actions
-                    )
-                    action_html = f'<ul style="list-style:none;margin:8px 0 0;padding:0;">{lis}</ul>'
 
                 example_html = ""
                 if example:
@@ -70,7 +59,7 @@ def display_detailed_feedback(analysis: Dict[str, Any]) -> None:
                         f'border-radius:8px;padding:10px 14px;">'
                         f'<span style="font-size:10px;font-weight:700;text-transform:uppercase;'
                         f'letter-spacing:.5px;color:#555C6B;display:block;margin-bottom:4px;">Example</span>'
-                        f'<pre style="margin:0;font-family:\'DM Mono\',monospace;font-size:12px;'
+                        f'<pre style="margin:0;font-family:monospace;font-size:12px;'
                         f'color:#8C92A0;white-space:pre-wrap;line-height:1.6;">{example}</pre></div>'
                     )
 
@@ -96,7 +85,6 @@ def display_detailed_feedback(analysis: Dict[str, Any]) -> None:
                             {"<p style='font-size:13px;color:#8C92A0;margin:0 0 10px;line-height:1.6;'>"+expl+"</p>" if expl else ""}
                             {detail_rows}
                             {"<div style='background:rgba(46,204,138,.07);border:1px solid rgba(46,204,138,.2);border-radius:8px;padding:10px 14px;font-size:13px;color:#2ECC8A;line-height:1.6;margin-top:8px;'><strong style='display:block;font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;'>Fix:</strong>"+fix+"</div>" if fix else ""}
-                            {action_html}
                             {example_html}
                         </div>
                     </div>

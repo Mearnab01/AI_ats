@@ -23,8 +23,11 @@ _FALLBACK_MODEL  = "all-mpnet-base-v2"
 _CHUNK_SIZE    = 1_500   # chars ≈ 375 tokens, well within 512
 _CHUNK_OVERLAP = 200
 
-@st.cache_resource(show_spinner=False)
+_MODEL_CACHE: dict = {}  
 def _load_model() -> tuple[SentenceTransformer, bool, dict]:
+    if _MODEL_CACHE:
+        return _MODEL_CACHE["model"], _MODEL_CACHE["finetuned"], _MODEL_CACHE["meta"]
+ 
     if _FINETUNED_PATH.exists():
         try:
             model    = SentenceTransformer(str(_FINETUNED_PATH))
@@ -39,6 +42,7 @@ def _load_model() -> tuple[SentenceTransformer, bool, dict]:
                 metadata.get("finetuned_mae", "?"),
                 metadata.get("improvement_pct", "?"),
             )
+            _MODEL_CACHE.update({"model": model, "finetuned": True, "meta": metadata})
             return model, True, metadata
         except Exception as exc:
             logger.warning("Fine-tuned model load failed (%s) - falling back to %s", exc, _FALLBACK_MODEL)
@@ -51,10 +55,8 @@ def _load_model() -> tuple[SentenceTransformer, bool, dict]:
         _FINETUNED_PATH,
         _FALLBACK_MODEL,
     )
+    _MODEL_CACHE.update({"model": model, "finetuned": False, "meta": {}})
     return model, False, {}
-
-
-
 def get_model_info() -> dict:
     """Return metadata about which model is active. Safe to call any time."""
     _, using_finetuned, metadata = _load_model()
