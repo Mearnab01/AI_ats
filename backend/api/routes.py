@@ -9,6 +9,7 @@ from backend.models.schemas import (
     ComponentScores,
     JDComparison,
     SkillValidationDetails,
+    LocationPrivacy,
 )
 
 logger = setup_logger("ats_resume_scorer | backend api routes")
@@ -136,7 +137,17 @@ async def analyze_resume(
             "base_mae":        bert_info.get("base_mae"),
             "improvement_pct": bert_info.get("improvement_pct"),
         },
-    )
+        location_privacy=LocationPrivacy(
+        risk=(
+            result.get("location_privacy", {})
+                .get("risk", "none")
+        ),
+        recommendations=(
+            result.get("location_privacy", {})
+                .get("recommendations", [])
+        ),
+    ),
+)
 
 
 # ── history ────────────────────────────────────────────────────────────────────

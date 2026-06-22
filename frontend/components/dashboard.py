@@ -12,7 +12,7 @@ from frontend.components.recommendations     import display_recommendations
 
 from frontend.components._helpers            import card, section_header, svg_icon
 
- 
+  
 def display_results(analysis: Dict[str, Any]) -> None:
     """Render the full results dashboard."""
 
@@ -86,8 +86,9 @@ def display_results(analysis: Dict[str, Any]) -> None:
 
 
 # ── ATS meta + privacy ────────────────────────────────────────────────────────
- 
+
 def _display_ats_meta(analysis: Dict[str, Any]) -> None:
+    
     grammar   = analysis.get("grammar_summary")  or {}
     privacy   = analysis.get("location_privacy") or {}
     bert      = analysis.get("bert_model_info")  or {}

@@ -94,7 +94,7 @@ def _calculate_semantic_similarity(skill: str, text: str, embedder: SentenceTran
 
         return float(max(0.0, min(1.0, similarity)))
     except Exception as e:
-        logger(f"Similarity error for '{skill}': {e}", context='ats_scorer')
+        logger.error(f"Similarity error for '{skill}': {e}", context='ats_scorer')
         return 0.0
 
 def _skill_matches(skill: str, text: str, embedder: SentenceTransformer, threshold: float) -> Tuple[bool, float]:
@@ -394,7 +394,6 @@ def generate_strengths(
     skill_validation_results: Dict,
     grammar_results: Dict,
 ) -> List[str]:
-
     strengths = []
 
     if score_results['formatting_score']       >= 16:

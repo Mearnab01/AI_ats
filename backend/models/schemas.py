@@ -22,6 +22,10 @@ class SkillValidationDetails(BaseModel):
     validated_count: int = 0
     validation_pct: float = 0.0
 
+class LocationPrivacy(BaseModel):
+    risk: str = "none"
+    recommendations: List[str] = []
+
 class IssueDetail(BaseModel):
     issue_title: str
     severity_level: str
@@ -52,3 +56,4 @@ class AnalysisResponse(BaseModel):
     warnings: List[str] = []
     interpretation: str = ""
     bert_model_info: Optional[dict] = None
+    location_privacy: Optional[LocationPrivacy] = None
