@@ -10,7 +10,31 @@ logger = setup_logger("ats_resume_scorer | groq parser")
  
 GROQ_MODEL = "llama-3.3-70b-versatile"
 
-_PARSE_CACHE: dict[str, dict] = {}
+# ── Disk-backed cache (survives server restarts) ──────────────────────────────
+import pathlib, pickle, threading
+
+_CACHE_DIR  = pathlib.Path(__file__).parent.parent / ".cache"
+_CACHE_FILE = _CACHE_DIR / "groq_parse_cache.pkl"
+_CACHE_LOCK = threading.Lock()
+
+def _load_disk_cache() -> dict:
+    try:
+        if _CACHE_FILE.exists():
+            with open(_CACHE_FILE, "rb") as f:
+                return pickle.load(f)
+    except Exception:
+        pass
+    return {}
+
+def _save_disk_cache(cache: dict) -> None:
+    try:
+        _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        with open(_CACHE_FILE, "wb") as f:
+            pickle.dump(cache, f)
+    except Exception as e:
+        logger.warning(f"Cache save failed: {e}")
+
+_PARSE_CACHE: dict[str, dict] = _load_disk_cache()
  
 MAX_INPUT_CHARS = 6_000   # ~1 500 tokens;
 MAX_TOKENS      = 2_048   # JSON output never exceeds this
@@ -130,7 +154,9 @@ def parse_resume(raw_text:str)->Dict:
     
     prompt = RESUME_USER_PROMPT.format(raw_text=text)
     result = _validate_resume_result(_call_with_retry(RESUME_SYSTEM_PROMPT, prompt))
-    _PARSE_CACHE[key] = result
+    with _CACHE_LOCK:
+        _PARSE_CACHE[key] = result
+        _save_disk_cache(_PARSE_CACHE)
     return result
 
 def parse_job_description(raw_text: str) -> Dict:
@@ -143,9 +169,11 @@ def parse_job_description(raw_text: str) -> Dict:
  
     prompt = JD_USER_PROMPT.format(raw_text=text)
     result = _validate_jd_result(_call_with_retry(JD_SYSTEM_PROMPT, prompt))
-    _PARSE_CACHE[key] = result
+    with _CACHE_LOCK:
+        _PARSE_CACHE[key] = result
+        _save_disk_cache(_PARSE_CACHE)
     return result
-    
+
 # ── validators ────────────────────────────────────────────────────────────────
  
 def _validate_resume_result(result: dict | None) -> dict:

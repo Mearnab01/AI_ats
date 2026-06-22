@@ -161,11 +161,9 @@ async def delete_history(
 async def generate_pdf(request: Request):
     body = await request.json()
     try:
-        from backend.services.report_generator import generate_html_reports
-        from backend.services.pdf_export import html_to_pdf
-        reports   = generate_html_reports(body)
-        pdf_bytes = html_to_pdf(reports.get("summary", ""))
+        from backend.services.pdf_export import generate_pdf_report
         from fastapi.responses import Response
+        pdf_bytes   = generate_pdf_report(body)
         return Response(
             content    = pdf_bytes,
             media_type = "application/pdf",
@@ -180,20 +178,18 @@ async def generate_history_pdf(
     user_id: str = Depends(get_current_user),
 ):
     from backend.database.supabase_db import get_user_history
-    from backend.services.report_generator import generate_html_reports
-    from backend.services.pdf_export import generate_combined_pdf
+    from backend.services.pdf_export import generate_pdf_report
  
     history = await get_user_history(user_id)
     analysis_data = next(
-        (item["analysis_result"] for item in history if item["id"] == analysis_id),
+        (item["analysis_result"] for item in history if str(item["id"]) == str(analysis_id)),
         None,
     )
     if not analysis_data:
         raise HTTPException(status_code=404, detail="Analysis not found")
  
     try:
-        html_docs = generate_html_reports(analysis_data)
-        pdf_bytes = generate_combined_pdf(html_docs)
+        pdf_bytes = generate_pdf_report(analysis_data)
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",

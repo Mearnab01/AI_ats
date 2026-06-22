@@ -1,5 +1,4 @@
 import io
-import magic
 from typing import Tuple, Optional
 
 import pdfplumber
@@ -32,6 +31,40 @@ class FileValidationError(Exception):
     """Custom exception for file validation errors."""
     pass
 
+
+# Pure-Python MIME detection — no libmagic / system deps needed
+def _sniff_mime(file_data: bytes, filename: str) -> str:
+    """Detect MIME type from magic bytes, then fall back to file extension."""
+    # PDF: %PDF header
+    if file_data[:4] == b'%PDF':
+        return 'application/pdf'
+    # DOCX (ZIP-based Office): PK header — peek inside to confirm word/
+    if file_data[:2] == b'PK':
+        try:
+            import zipfile
+            with zipfile.ZipFile(__import__('io').BytesIO(file_data)) as z:
+                names = z.namelist()
+            if any(n.startswith('word/') for n in names):
+                return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        except Exception:
+            pass
+        # Default ZIP-based to docx
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    # Legacy .doc: OLE2 magic bytes D0 CF 11 E0
+    if file_data[:4] == b'\xd0\xcf\x11\xe0':
+        return 'application/msword'
+    # Extension fallback
+    ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
+    ext_map = {
+        'pdf':  'application/pdf',
+        'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'doc':  'application/msword',
+    }
+    if ext in ext_map:
+        return ext_map[ext]
+    raise ValueError(f"Unrecognised file type for '{filename}'")
+
+
 # 1. validate file size and type
 def validate_file(file_data:bytes, filename:str) -> Tuple[bool, str, Optional[str]]:
     file_size_byte = len(file_data)
@@ -49,7 +82,7 @@ def validate_file(file_data:bytes, filename:str) -> Tuple[bool, str, Optional[st
       
     
     try:
-        mime_type = magic.from_buffer(file_data, mime=True)
+        mime_type = _sniff_mime(file_data, filename)
     except Exception as e:
         log_error(f"Error determining MIME type for file '{filename}': {str(e)}")
         return False, f'Could not determine the file type.{e}', None
@@ -277,4 +310,3 @@ def parse_resume_file(file_data: bytes, filename: str)-> str:
     
     return text, metadata
 
-## 

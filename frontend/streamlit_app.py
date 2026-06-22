@@ -6,7 +6,7 @@ from services import supabase_client
 from services.auth_utils import (
     _store_session,
     _clear_session
-)
+) 
 import streamlit.components.v1 as components
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -77,7 +77,6 @@ for key, default in [
 ]:
     if key not in st.session_state:
         st.session_state[key] = default
-
 
 
 # ── Google OAuth code exchange ──────────────────────────────────────────────────
