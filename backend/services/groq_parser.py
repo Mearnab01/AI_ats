@@ -161,17 +161,28 @@ def parse_resume(raw_text:str)->Dict:
 
 def parse_job_description(raw_text: str) -> Dict:
     text = raw_text[:MAX_INPUT_CHARS]
-    key  = _cache_key("jd", text)
- 
+    key = _cache_key("jd", text)
+
     if key in _PARSE_CACHE:
         logger.info("parse_job_description: cache hit - skipping Groq call")
         return _PARSE_CACHE[key]
- 
+
     prompt = JD_USER_PROMPT.format(raw_text=text)
-    result = _validate_jd_result(_call_with_retry(JD_SYSTEM_PROMPT, prompt))
+
+    try:
+        raw_result = _call_with_retry(JD_SYSTEM_PROMPT, prompt)
+        result = _validate_jd_result(raw_result)
+
+    except Exception as e:
+        logger.error("Exception inside parse_job_description")
+        logger.error(type(e))
+        logger.error(str(e))
+        raise
+
     with _CACHE_LOCK:
         _PARSE_CACHE[key] = result
         _save_disk_cache(_PARSE_CACHE)
+
     return result
 
 # ── validators ────────────────────────────────────────────────────────────────
@@ -234,3 +245,5 @@ def _validate_jd_result(result: dict | None) -> dict:
             result[key] = default
         if isinstance(default, list) and not isinstance(result[key], list):
             result[key] = default
+            
+    return result

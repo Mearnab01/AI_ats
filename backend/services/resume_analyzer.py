@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import logging
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, List, Optional
 
@@ -141,7 +140,7 @@ async def analyze_full_resume(
     jd_keywords:          list = []
     bert_model_info             = get_model_info()   # always include in response, even without a JD
 
-    if parsed_jd:
+    if parsed_jd is not None:
         jd_keywords = list(set(
             parsed_jd.get("keywords", [])
             + parsed_jd.get("required_skills", [])

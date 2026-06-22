@@ -101,6 +101,11 @@ def display_skill_validation(analysis: Dict[str, Any]) -> None:
                 'border:1px solid rgba(240,80,58,.2);border-radius:9999px;padding:3px 11px;'
                 'font-size:12px;font-weight:600;margin:2px 3px;">' + str(s) + '</span>'
             )
+            
+        s1 = str(unvalidated[0]) if len(unvalidated) > 0 else "Skill A"
+        s2 = str(unvalidated[1]) if len(unvalidated) > 1 else "Skill B"
+        dynamic_example = f'"Built [Project Name] using {s1} and {s2}, achieving [measurable result]."'
+        
         st.markdown(
             '<div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.07);">'
             '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;'
@@ -110,8 +115,7 @@ def display_skill_validation(analysis: Dict[str, Any]) -> None:
             'border:1px solid rgba(245,166,35,.15);border-radius:8px;padding:10px 14px;'
             'font-size:13px;color:#F5A623;line-height:1.6;">'
             '<strong>How to fix:</strong> Add a project or experience bullet that names each skill '
-            'above in context. Example: <em style="opacity:.85;">"Built a CI/CD pipeline using '
-            'Kubernetes and Terraform, reducing deployment time by 35%."</em></div></div>',
+            'above in context. Example: <em style="opacity:.85;">' + dynamic_example + '</em></div></div>',
             unsafe_allow_html=True,
         )
 

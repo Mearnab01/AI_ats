@@ -8,7 +8,8 @@ from frontend.components._helpers import card, section_header, progress_bar, bar
 
 
 def display_jd_comparison(analysis: Dict[str, Any]) -> None:
-    jd = analysis.get("jd_comparison") or analysis.get("jd_match_analysis")
+    
+    jd = analysis.get("jd_comparison") or analysis.get("jd_match_analysis")    
     if not jd:
         st.markdown(
             card(
