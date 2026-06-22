@@ -240,7 +240,7 @@ def _build_txt_summary(analysis: Dict[str, Any]) -> str:
         "-" * 20,
         "  Address Privacy Risk : " + str(privacy.get("risk", "none")).upper(),
         "  Grammar Errors       : " + str(grammar.get("total_errors", 0)),
-        "  Score Penalty        : -" + str(grammar.get("penalty", 0)) + " pts",
+        "  Grammar Penalty        : -" + str(grammar.get("penalty", 0)) + " pts",
         "",
         "Strengths",
         "-" * 20,
