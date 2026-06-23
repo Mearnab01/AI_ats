@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title             = "Criterion — Resume Intelligence",
-    page_icon              = "⬡",
+    page_icon              = ":material/hexagon:",
     layout                 = "wide",
     initial_sidebar_state  = "expanded",
 )
@@ -117,6 +117,7 @@ with st.sidebar:
         ("landing", "Home"),
         ("scorer",  "Analyse"),
         ("history", "History"),
+        ("jobs",    "Jobs"), 
     ]
 
     for view_key, label in nav_items:
@@ -208,6 +209,9 @@ elif view == "scorer":
     render()
 elif view == "history":
     from frontend.views.history import render
+    render()
+elif view == "jobs":
+    from frontend.views.jobs import render
     render()
 else:
     from frontend.views.landing import render

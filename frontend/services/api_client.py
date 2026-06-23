@@ -35,6 +35,37 @@ def analyze_resume(
     resp.raise_for_status()
     return resp.json()
 
+def validate_document(file, access_token: str = "") -> Dict[str, Any]:
+    """POST /api/v1/validate-document"""
+    file_bytes = file.read() if hasattr(file, "read") else file
+    file_name  = getattr(file, "name", "upload.pdf")
+ 
+    if hasattr(file, "seek"):
+        file.seek(0)
+ 
+    resp = requests.post(
+        f"{_BASE}/validate-document",
+        headers = _headers(access_token),
+        files   = {"resume": (file_name, BytesIO(file_bytes), "application/octet-stream")},
+        timeout = 30,
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+def get_jobs(
+    query:        str = "",
+    location:     str = "India",
+    access_token: str = "",
+) -> Dict[str, Any]:
+    """GET /api/v1/jobs"""
+    resp = requests.get(
+        f"{_BASE}/jobs",
+        headers = _headers(access_token),
+        params  = {"query": query, "location": location},
+        timeout = 250,
+    )
+    resp.raise_for_status()
+    return resp.json()
 
 def get_history(access_token: str) -> List[Dict[str, Any]]:
     """GET /api/v1/history"""

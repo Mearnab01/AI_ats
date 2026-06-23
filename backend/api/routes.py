@@ -27,6 +27,31 @@ def _clean_list(items: list) -> list:
     return [_clean(s) if isinstance(s, str) else s for s in items]
 
 
+@router.post("/validate-document")
+async def validate_document_endpoint(
+    resume: UploadFile = File(...),
+    user_id: str = Depends(get_current_user),
+):
+    file_bytes = await resume.read()
+    filename   = resume.filename or "upload"
+ 
+    if len(file_bytes) == 0:
+        raise HTTPException(status_code=400, detail="File is empty.")
+ 
+    if len(file_bytes) > MAX_FILE_SIZE_BYTES:
+        raise HTTPException(status_code=413, detail="File too large.")
+ 
+    try:
+        from backend.services.resume_parser import parse_resume_file
+        resume_text, _ = parse_resume_file(file_bytes, filename)
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=f"Could not extract text: {exc}")
+ 
+    from backend.services.doc_validator import validate_document
+    result = validate_document(resume_text)
+    return result
+
+
 # ── resume analysis ────────────────────────────────────────────────────────────
 
 @router.post("/analyze-resume", response_model=AnalysisResponse)
@@ -59,6 +84,20 @@ async def analyze_resume(
     except Exception as exc:
         logger.error("File parsing failed: %s", exc)
         raise HTTPException(status_code=422, detail=f"Could not read resume: {exc}")
+    
+     # ── doc validation gate ─────────────────────────────────────
+    from backend.services.doc_validator import validate_document
+    doc_check = validate_document(resume_text)
+    if not doc_check.get("is_resume", True):
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "type":          "not_a_resume",
+                "document_type": doc_check.get("document_type", "Unknown"),
+                "confidence":    doc_check.get("confidence", 0),
+                "reasoning":     doc_check.get("reasoning", []),
+            },
+        )
 
     # ── analysis ──────────────────────────────────────────────────────────────
     try:
@@ -112,6 +151,30 @@ async def analyze_resume(
         asyncio.ensure_future(save_analysis(user_id=user_id, filename=filename, analysis_result=result))
     except Exception as db_exc:
         logger.warning("DB save skipped: %s", db_exc)
+        
+        
+    # ── save with cache fields ───────────────────────────────────
+    try:
+        import asyncio
+        from backend.services.job_matcher import embed_resume
+        from backend.database.supabase_db import save_analysis
+ 
+        resume_skills    = result.get("skills", [])
+        resume_embedding = embed_resume(resume_text)   # reuses loaded model
+ 
+        asyncio.ensure_future(
+            save_analysis(
+                user_id          = user_id,
+                filename         = filename,
+                analysis_result  = result,
+                resume_text      = resume_text,
+                resume_skills    = resume_skills,
+                resume_embedding = resume_embedding,
+                doc_validation   = doc_check,
+            )
+        )
+    except Exception as db_exc:
+        logger.warning("DB save skipped: %s", db_exc)
 
     bert_info = result.get("bert_model_info") or {}
     return AnalysisResponse(
@@ -149,7 +212,68 @@ async def analyze_resume(
     ),
 )
 
-
+# ── jobs endpoint ─────────────────────────────────────────────────────────
+@router.get("/jobs")
+async def get_job_recommendations(
+    request:  Request,
+    query:    str = "",
+    location: str = "India",
+    user_id:  str = Depends(get_current_user),
+):
+    """
+    Fetch + rank jobs using cached resume embedding.
+    1. Load latest analysis from Supabase (cached skills + embedding)
+    2. If no cache → ask user to run analysis first
+    3. Fetch from Apify (or Supabase job cache)
+    4. Rank via cosine similarity
+    5. Return ranked list
+    """
+    from backend.database.supabase_db import get_latest_analysis, save_job_matches
+    from backend.services.job_fetcher  import fetch_jobs
+    from backend.services.job_matcher  import rank_jobs
+ 
+    # Load cached resume data
+    cached = await get_latest_analysis(user_id)
+    if not cached:
+        raise HTTPException(
+            status_code=404,
+            detail="No resume analysis found. Run an ATS analysis first.",
+        )
+ 
+    resume_text      = cached.get("resume_text", "")
+    resume_skills    = cached.get("resume_skills") or []
+    resume_embedding = cached.get("resume_embedding")
+    analysis_id      = cached.get("id")
+ 
+    # Infer query from skills + filename if not provided
+    if not query:
+        skill_str = " ".join(resume_skills[:5])
+        query     = skill_str or "Software Engineer"
+ 
+    # Fetch jobs (Apify → Supabase cache)
+    raw_jobs = await fetch_jobs(query=query, location=location)
+ 
+    # Rank
+    ranked = await rank_jobs(
+        jobs             = raw_jobs,
+        resume_text      = resume_text,
+        resume_skills    = resume_skills,
+        resume_embedding = resume_embedding,
+    )
+ 
+    # Persist matches
+    if ranked and analysis_id:
+        import asyncio
+        asyncio.ensure_future(save_job_matches(user_id, str(analysis_id), ranked))
+ 
+    return {
+        "query":      query,
+        "location":   location,
+        "total":      len(ranked),
+        "jobs":       ranked[:30],
+        "cached_from": cached.get("filename", ""),
+    }
+    
 # ── history ────────────────────────────────────────────────────────────────────
 
 @router.get("/history")

@@ -15,7 +15,56 @@ def _show_backend_error(exc: Exception) -> None:
     else:
         st.markdown(alert(f"Unexpected error: {exc}", "danger"), unsafe_allow_html=True)
 
-
+# ── _show_rejection_ui ───────────────────────────────────────────────────────────────
+ 
+def _show_rejection_ui(doc_type: str, confidence: int, reasoning: list) -> None:
+    reasons_html = "".join(
+        f'<li style="margin:4px 0;color:#8C92A0;font-size:13px;">{r}</li>'
+        for r in reasoning
+    )
+ 
+    st.markdown(
+        f"""
+        <div style="background:rgba(240,80,58,.06);border:1px solid rgba(240,80,58,.25);
+        border-radius:12px;padding:24px 28px;margin:24px 0;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                <div style="font-size:28px;">❌</div>
+                <div>
+                    <div style="font-size:18px;font-weight:700;color:#F0503A;
+                    font-family:'Fraunces',serif;">ATS Analysis Stopped</div>
+                    <div style="font-size:13px;color:#8C92A0;margin-top:2px;">
+                        This file does not appear to be a resume
+                    </div>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+                <div style="background:#181B22;border:1px solid rgba(255,255,255,.07);
+                border-radius:8px;padding:12px 16px;">
+                    <div style="font-size:10px;font-weight:700;text-transform:uppercase;
+                    letter-spacing:1px;color:#555C6B;margin-bottom:4px;">Detected File Type</div>
+                    <div style="font-size:16px;font-weight:600;color:#F0F2F5;">{doc_type}</div>
+                </div>
+                <div style="background:#181B22;border:1px solid rgba(255,255,255,.07);
+                border-radius:8px;padding:12px 16px;">
+                    <div style="font-size:10px;font-weight:700;text-transform:uppercase;
+                    letter-spacing:1px;color:#555C6B;margin-bottom:4px;">Confidence</div>
+                    <div style="font-size:16px;font-weight:600;color:#F0503A;">{confidence}%</div>
+                </div>
+            </div>
+            <div style="background:#181B22;border:1px solid rgba(255,255,255,.07);
+            border-radius:8px;padding:14px 16px;margin-bottom:16px;">
+                <div style="font-size:10px;font-weight:700;text-transform:uppercase;
+                letter-spacing:1px;color:#555C6B;margin-bottom:8px;">Reason</div>
+                <ul style="margin:0;padding-left:16px;">{reasons_html}</ul>
+            </div>
+            <div style="font-size:13px;color:#8C92A0;">
+                Upload a valid resume (PDF, DOC, or DOCX) to continue.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    
 def render() -> None:
     st.markdown(
         '<h1 style="font-family:\'Fraunces\',serif;font-size:26px;color:#F0F2F5;margin:0 0 6px;letter-spacing:-0.02em;">Analyse Resume</h1>'
@@ -122,7 +171,38 @@ def render() -> None:
                 unsafe_allow_html=True,
             )
             return
-        with st.spinner("Analyzing resume… This may take up to 30 seconds."):
+        
+        # Step 1: Validate document type BEFORE running expensive analysis
+        with st.spinner("Checking document type…"):
+            try:
+                val_result = api_client.validate_document(resume_file, access_token)
+                if not val_result.get("is_resume", True):
+                    _show_rejection_ui(
+                        doc_type   = val_result.get("document_type", "Unknown"),
+                        confidence = val_result.get("confidence", 0),
+                        reasoning  = val_result.get("reasoning", []),
+                    )
+                    return
+            except requests.HTTPError as exc:
+                if exc.response is not None and exc.response.status_code == 422:
+                    try:
+                        detail = exc.response.json().get("detail", {})
+                        if isinstance(detail, dict) and detail.get("type") == "not_a_resume":
+                            _show_rejection_ui(
+                                doc_type   = detail.get("document_type", "Unknown"),
+                                confidence = detail.get("confidence", 0),
+                                reasoning  = detail.get("reasoning", []),
+                            )
+                            return
+                    except Exception:
+                        pass
+                _show_backend_error(exc)
+                return
+            except Exception as exc:
+                pass
+        
+        # Step 2: Full ATS analysis
+        with st.spinner("Analyzing your resume… This may take sometime..."):
             try:
                 result = api_client.analyze_resume(
                     file = resume_file,

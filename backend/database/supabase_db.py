@@ -19,7 +19,16 @@ def _get_headers():
         "Prefer": "return=representation"
     }
 
-async def save_analysis(user_id: str, filename: str, analysis_result: Dict) -> Optional[str]:
+async def save_analysis(
+    user_id: str, 
+    filename: str, 
+    analysis_result: Dict,
+    resume_text:     str        = "",
+    resume_skills:   List[str]  = None,
+    resume_embedding: List[float] = None,
+    doc_validation:  Dict       = None,
+    ) -> Optional[str]:
+    
     headers = _get_headers()
     if not headers:
         return None
@@ -38,6 +47,11 @@ async def save_analysis(user_id: str, filename: str, analysis_result: Dict) -> O
         "missing_keywords": serializable_result.get("missing_keywords", []),
         "created_at": datetime.now(timezone.utc).isoformat(),
         "analysis_result": serializable_result,
+        
+        "resume_text":       resume_text[:20000] if resume_text else "",
+        "resume_skills":     resume_skills or [],
+        "resume_embedding":  resume_embedding,        # nullable float array
+        "doc_validation":    doc_validation or {},
     }
 
     url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/analyses"
@@ -55,6 +69,83 @@ async def save_analysis(user_id: str, filename: str, analysis_result: Dict) -> O
     except Exception as exc:
         logger.error(f"Failed to save analysis to Supabase: {exc}")
         return None
+    
+    
+async def get_latest_analysis(user_id: str) -> Optional[Dict]:
+    """
+    Return the most recent analysis row for a user.
+    Jobs page uses this to get cached skills + embedding
+    without re-running any model.
+    """
+    headers = _get_headers()
+    if not headers:
+        return None
+ 
+    url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/analyses"
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                url,
+                headers = headers,
+                params  = {
+                    "user_id": f"eq.{user_id}",
+                    "order":   "created_at.desc",
+                    "limit":   "1",
+                    "select":  "id,filename,ats_score,resume_text,resume_skills,resume_embedding,analysis_result,created_at",
+                },
+                timeout = 10,
+            )
+            resp.raise_for_status()
+            rows = resp.json()
+            return rows[0] if rows else None
+    except Exception as exc:
+        logger.error("get_latest_analysis failed: %s", exc)
+        return None
+    
+# ── get_cached_embedding ──────────────────────────────────────────────────
+ 
+async def get_cached_embedding(user_id: str) -> Optional[List[float]]:
+    """Return stored resume embedding for the user's latest analysis."""
+    row = await get_latest_analysis(user_id)
+    if not row:
+        return None
+    return row.get("resume_embedding")
+
+# ── save_job_matches ──────────────────────────────────────────────────────
+ 
+async def save_job_matches(user_id: str, analysis_id: str, jobs: List[Dict]) -> None:
+    """
+    Persist ranked job matches linked to an analysis.
+    Stored in `job_matches` table.
+    """
+    headers = _get_headers()
+    if not headers:
+        return
+ 
+    rows = [
+        {
+            "user_id":     user_id,
+            "analysis_id": analysis_id,
+            "job_id":      j.get("id"),
+            "match_score": j.get("match_score", 0),
+            "created_at":  datetime.now(timezone.utc).isoformat(),
+        }
+        for j in jobs[:50]
+    ]
+ 
+    url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/job_matches"
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                url,
+                headers = {**headers, "Prefer": "resolution=merge-duplicates,return=minimal"},
+                json    = rows,
+                timeout = 10,
+            )
+            resp.raise_for_status()
+            logger.info("Saved %d job matches for user %s", len(rows), user_id)
+    except Exception as exc:
+        logger.error("save_job_matches failed: %s", exc)
 
 async def get_user_history(user_id: str) -> List[Dict]:
     headers = _get_headers()
