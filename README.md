@@ -4,9 +4,15 @@ An end-to-end ATS (Applicant Tracking System) resume analyser built with a multi
 
 ---
 
-## Live Demo
+## Links
 
-> Streamlit frontend · FastAPI backend · Supabase auth + storage
+| Resource | Link |
+|-----------|-----------|
+| 🚀 Live Demo | https://thunder421-criterion-by-arnab1028.hf.space |
+| 📊 Dataset | https://www.kaggle.com/datasets/arnabnath8201/resume-jd |
+| 🤗 Fine-Tuned Model | https://huggingface.co/Thunder421/criterion-finetuned-bert |
+
+> Streamlit frontend · FastAPI backend · Supabase auth + storage · Apify
 
 ---
 
